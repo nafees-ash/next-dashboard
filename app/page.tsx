@@ -1,13 +1,9 @@
 import Logo from '@/components/logo';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
-// import { useSupabaseClient } from '@supabase/auth-helpers-react';
-// import { Auth, ThemeSupa } from '@supabase/auth-ui-react';
-import styles from '@/components/home.module.css';
-import Link from 'next/link';
 import { lusitana } from '@/components/fonts';
 import AuthForm from '@/components/auth/auth-form';
 import clsx from 'clsx';
-import { COLOR_PALETTE, COLOR_PALETTE2 } from '@/components/variables';
+import { COLOR_PALETTE2 } from '@/components/variables';
 
 export default function Page() {
   return (
@@ -22,7 +18,6 @@ export default function Page() {
       </div>
       <div className="mt-4 flex grow flex-col gap-4 md:flex-row">
         <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10 md:w-[30%] md:px-10">
-          <div className={styles.shape} />
           <p
             className={`${lusitana.className} text-xl text-gray-800 antialiased md:text-3xl md:leading-normal`}
           >
