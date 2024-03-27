@@ -2,7 +2,7 @@
 
 import { lusitana } from '@/components/fonts';
 import AuthFormSignUp from '@/components/auth/auth-form-signup';
-import { createClient } from '@/app/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 import { useCallback, useEffect, useState } from 'react';
 import ChangePass from '@/components/profile/change-pass';
 import { Button } from '@/components/button';
@@ -35,7 +35,7 @@ export default function Page() {
       <h1
         className={`${lusitana.className} mb-4 text-xl font-[800] md:text-3xl`}
       >
-        {'Admin Name' || user}
+        {user}
       </h1>
       <div className="flex h-full w-full flex-col items-center justify-center gap-10 p-4 md:flex-row md:gap-20">
         <div>

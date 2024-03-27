@@ -1,48 +1,62 @@
 'use client';
 
-import { createClient } from '@/app/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 import { useCallback, useEffect, useState } from 'react';
-import { Medicines } from '@/app/lib/types/medicine';
+import { Medicines } from '@/lib/types/supabase';
 import { MedicineTable } from '@/components/medicines/data-table';
 import { NewMedicine } from '@/components/medicines/add-new';
 import { lusitana } from '@/components/fonts';
 import { Button } from '@/components/button';
 import { COLOR_PALETTE2 } from '@/components/variables';
 import { RefreshCcwIcon } from 'lucide-react';
+import { EditMedicine } from '@/components/medicines/edit-medicine';
 
 export default function Page() {
   const supabase = createClient();
   const [medecine, setMedecines] = useState<Medicines[]>([]);
   const [onRefresh, setResfresh] = useState<boolean>(false);
+  const [editData, setEditData] = useState({
+    id: 0,
+    title: '',
+    type: 'tab',
+    price: 0,
+    visible: false,
+  });
 
   const refresh = () => {
     setResfresh((prev) => !prev);
   };
 
+  const handleEditData = async (id: number) => {
+    const { data } = await supabase
+      .from('medicines')
+      .select('id, title, type, price')
+      .eq('id', id);
+
+    setEditData({
+      id: data && data[0].id,
+      title: data && data[0]?.title,
+      price: data && data[0]?.price,
+      type: data && data[0].type,
+      visible: true,
+    });
+  };
+
   const fetchMedicines = useCallback(async () => {
-    const { data: todos, error } = await supabase
+    const { data: meds, error } = await supabase
       .from('medicines')
       .select('*')
       .order('id', { ascending: true });
     if (error) {
       console.log('MedError', error);
     } else {
-      setMedecines(todos);
+      setMedecines(meds);
     }
   }, [supabase]);
 
   useEffect(() => {
     fetchMedicines();
   }, [fetchMedicines, onRefresh]);
-
-  // const deleteTodo = async (id: number) => {
-  //   try {
-  //     await supabase.from('todos').delete().eq('id', id).throwOnError();
-  //     setTodos(todos.filter((x) => x.id != id));
-  //   } catch (error) {
-  //     console.log('error', error);
-  //   }
-  // };
 
   return (
     <main className="flex h-full w-full flex-col">
@@ -56,13 +70,23 @@ export default function Page() {
           <h2 className=" mb-4 text-xl font-bold text-gray-800">
             All Medicines
           </h2>
-          <MedicineTable data={medecine} />
+          <MedicineTable data={medecine} editMedicine={handleEditData} />
         </div>
-        <div>
-          <h2 className=" mb-4 text-xl font-bold text-gray-800">
-            Add New Medicine
-          </h2>
-          <NewMedicine />
+        <div className="flex flex-col gap-10">
+          <div>
+            <h2 className=" mb-4 text-xl font-bold text-gray-800">
+              Add New Medicine
+            </h2>
+            <NewMedicine />
+          </div>
+          {editData.visible && (
+            <div>
+              <h2 className=" mb-4 text-xl font-bold text-gray-800">
+                Edit Medicine
+              </h2>
+              <EditMedicine medDetails={editData} supabase={supabase} />
+            </div>
+          )}
         </div>
       </div>
       <Button

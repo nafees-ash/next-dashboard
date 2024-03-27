@@ -21,12 +21,12 @@ export default function Page() {
         <Logo />
       </div>
       <div className="mt-4 flex grow flex-col gap-4 md:flex-row">
-        <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10 md:w-[30%] md:px-20">
+        <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10 md:w-[30%] md:px-10">
           <div className={styles.shape} />
           <p
             className={`${lusitana.className} text-xl text-gray-800 antialiased md:text-3xl md:leading-normal`}
           >
-            <strong>Welcome to Acme.</strong>
+            <strong>Welcome to MeDDose Admin Panel.</strong>
           </p>
           <div
             className="flex items-center justify-center gap-5 self-start rounded-lg border-[1px]  px-6 py-3 text-sm font-medium md:text-base"

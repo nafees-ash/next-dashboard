@@ -1,5 +1,5 @@
 import { signup } from '@/app/auth/actions';
-import { createClient } from '@/app/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 import { useToast } from '../ui/use-toast';
 import { Button } from '../ui/button';
 import { COLOR_PALETTE2 } from '../variables';

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { COLOR_PALETTE2 } from '../variables';
 import { Input } from '../ui/input';
 import { useToast } from '../ui/use-toast';
-import { createClient } from '@/app/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 import { Button } from '../ui/button';
 
 export default function ChangePass() {

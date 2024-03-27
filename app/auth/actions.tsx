@@ -3,10 +3,11 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { createClient } from '@/app/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
+import { isAuthenticated, isAdmin } from '@/lib/auth';
 
 export async function login(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
@@ -18,24 +19,11 @@ export async function login(formData: FormData) {
     redirect('/login-error');
   }
 
-  const user = await supabase.auth.getUser();
-  const session = await supabase.auth.getSession();
-
-  const response = await supabase
-    .from('admin')
-    .select('*')
-    .eq('uid', user?.data?.user?.id);
-  // console.log(response);
-
-  if (typeof response != 'undefined') {
-    if (response.data && response.data.length < 1) {
-      if (session) {
-        await supabase.auth.signOut();
-      }
-      redirect('/');
+  if ((await isAdmin()) !== true) {
+    if (await isAuthenticated()) {
+      await supabase.auth.signOut();
     }
-  } else {
-    redirect('/user-error');
+    redirect('/');
   }
 
   revalidatePath('/', 'layout');
@@ -43,7 +31,7 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const data = {
     email: formData.get('email') as string,

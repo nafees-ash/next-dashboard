@@ -1,12 +1,5 @@
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -20,6 +13,8 @@ import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { createClient } from '@/lib/supabase/client';
 import { COLOR_PALETTE2 } from '../variables';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { EditMedecineProp } from '@/lib/types/supabase';
 
 interface MedInput {
   title: string;
@@ -27,21 +22,27 @@ interface MedInput {
   type: 'tab' | 'cap' | 'syr' | 'gel' | 'drop';
 }
 
-export function NewMedicine() {
+export function EditMedicine({
+  supabase,
+  medDetails,
+}: {
+  supabase: SupabaseClient;
+  medDetails: EditMedecineProp;
+}) {
   const { toast } = useToast();
-  const supabase = createClient();
-  const [formData, setFormData] = useState<MedInput>({
-    title: '',
-    price: 0,
-    type: 'tab',
+  const [buttonEnable, setButtonEnable] = useState(false);
+  const [formData, setFormData] = useState<EditMedecineProp>({
+    id: medDetails.id,
+    title: medDetails.title,
+    price: medDetails.price,
+    type: medDetails.type,
   });
 
   const handleSubmit = async () => {
     const { data: _, error } = await supabase
       .from('medicines')
-      .insert(formData)
-      .select()
-      .single();
+      .update(formData)
+      .eq('id', formData.id);
 
     if (error) {
       toast({
@@ -49,21 +50,13 @@ export function NewMedicine() {
       });
       return;
     }
-    clearform();
     toast({
-      description: 'Medicine added.',
-    });
-  };
-
-  const clearform = () => {
-    setFormData({
-      title: '',
-      price: 0,
-      type: 'tab',
+      description: 'Medicine Edited.',
     });
   };
 
   function handleChange(event: { target: { name: any; value: any } }): void {
+    setButtonEnable(true);
     setFormData((prevFormData) => {
       return {
         ...prevFormData,
@@ -74,6 +67,7 @@ export function NewMedicine() {
   function handleSelectChange(
     value: 'tab' | 'cap' | 'syr' | 'gel' | 'drop',
   ): void {
+    setButtonEnable(true);
     setFormData((prevFormData) => {
       return {
         ...prevFormData,
@@ -150,20 +144,10 @@ export function NewMedicine() {
             backgroundColor: COLOR_PALETTE2.lightblue,
             borderColor: COLOR_PALETTE2.darkblue,
           }}
-          onClick={clearform}
-        >
-          Clear
-        </Button>
-        <Button
-          className="col-span-2 rounded-lg border-[1px] p-3 text-black hover:bg-blue-200"
-          style={{
-            backgroundColor: COLOR_PALETTE2.lightblue,
-            borderColor: COLOR_PALETTE2.darkblue,
-          }}
           onClick={handleSubmit}
-          disabled={formData.title ? false : true}
+          disabled={buttonEnable ? false : true}
         >
-          Add
+          Edit
         </Button>
       </CardFooter>
     </Card>

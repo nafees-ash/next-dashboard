@@ -1,18 +1,14 @@
 'use client';
-import { createClient } from '@/app/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/button';
-// import { Card } from '@/components/dashboard/cards';
-// import RevenueChart from '@/components/dashboard/revenue-chart';
-// import LatestInvoices from '@/components/dashboard/latest-invoices';
 import { lusitana } from '@/components/fonts';
 import { COLOR_PALETTE2 } from '@/components/variables';
 import { RefreshCcwIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-// import AuthFormSignUp from '@/components/auth/auth-form-signup';
-// import { createClient } from '@/app/lib/supabase/client';
-// import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 
 interface CountObject {
+  userCount: number;
   totalMedicine: number;
   totalOrder: number;
   pendingOrder: number;
@@ -22,16 +18,20 @@ export default function Page() {
   const supabase = createClient();
   const [onRefresh, setResfresh] = useState<boolean>(false);
   const [count, setCount] = useState<CountObject>({
+    userCount: 0,
     totalMedicine: 0,
     totalOrder: 0,
     pendingOrder: 0,
   });
+  const [pendingOrders, setPendingOrders] = useState<any[]>();
+  const [deliveringOrder, setDeliveringOrders] = useState<any[]>();
 
   const refresh = () => {
     setResfresh((prev) => !prev);
   };
   const getCounts = useCallback(async () => {
     try {
+      const { data: userData } = await supabase.from('users').select('*');
       const { data: medicinesData } = await supabase
         .from('medicines')
         .select('*');
@@ -41,6 +41,7 @@ export default function Page() {
         .select('*')
         .eq('status', 'pending');
 
+      const totalUserCount = userData ? userData.length : 0;
       const totalMedicineCount = medicinesData ? medicinesData.length : 0;
       const totalOrderCount = allOrdersData ? allOrdersData.length : 0;
       const pendingOrderCount = pendingOrdersData
@@ -48,6 +49,7 @@ export default function Page() {
         : 0;
 
       setCount({
+        userCount: totalUserCount,
         totalMedicine: totalMedicineCount,
         totalOrder: totalOrderCount,
         pendingOrder: pendingOrderCount,
@@ -61,25 +63,41 @@ export default function Page() {
     getCounts();
   }, [getCounts, onRefresh]);
 
+  const fetchPending = useCallback(async () => {
+    const { data: pends, error } = await supabase
+      .from('orders')
+      .select('id')
+      .eq('status', 'pending')
+      .order('id', { ascending: true });
+    if (error) {
+      console.log('PendError', error);
+    } else {
+      setPendingOrders(pends);
+    }
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchPending();
+  }, [fetchPending, onRefresh]);
+
+  const fetchDelivering = useCallback(async () => {
+    const { data: dels, error } = await supabase
+      .from('orders')
+      .select('id')
+      .eq('status', 'delivering')
+      .order('id', { ascending: true });
+    if (error) {
+      console.log('DelError', error);
+    } else {
+      setDeliveringOrders(dels);
+    }
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchDelivering();
+  }, [fetchDelivering, onRefresh]);
+
   return (
-    // <main>
-    //   <h1 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
-    //     Dashboard
-    //   </h1>
-    //   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-    //     {/* <Card title="Collected" value={totalPaidInvoices} type="collected" />
-    //     <Card title="Pending" value={totalPendingInvoices} type="pending" />
-    //     <Card title="Total Invoices" value={numberOfInvoices} type="invoices" /> */}
-    //     {/* <Card
-    //       title="Total Customers"
-    //       value={numberOfCustomers}
-    //       type="customers"
-    //     /> */}
-    //   </div>
-    //   <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
-    //     {/* <RevenueChart revenue={revenue} /> */}
-    //   </div>
-    // </main>
     <main className="flex h-full w-full flex-col">
       <h1
         className={`${lusitana.className} mb-4 text-xl font-[800] md:text-3xl`}
@@ -87,7 +105,17 @@ export default function Page() {
         Overview
       </h1>
       <div className="flex h-full w-full flex-col items-center justify-center gap-5 p-4">
-        <div className="flex w-full gap-5">
+        <div className="flex w-full flex-col gap-5 md:flex-row">
+          <div
+            className="flex grow flex-col rounded-lg border-[1px] p-5"
+            style={{
+              borderColor: COLOR_PALETTE2.darkblue,
+              backgroundColor: COLOR_PALETTE2.lightblue,
+            }}
+          >
+            <h2 className="font-[800]">Total User</h2>
+            <p className="text-[24px]">{count.pendingOrder}</p>
+          </div>
           <div
             className="flex grow flex-col rounded-lg border-[1px] p-5"
             style={{
@@ -119,10 +147,61 @@ export default function Page() {
             <p className="text-[24px]">{count.pendingOrder}</p>
           </div>
         </div>
-        <div
-          className="w-full grow rounded-lg border-[1px]"
-          style={{ borderColor: COLOR_PALETTE2.lightblue }}
-        ></div>
+        <div className="flex h-full w-full flex-col rounded-lg ">
+          <div className="p-3">
+            <h2 className="text-xl font-[800]">Quick Overview</h2>
+          </div>
+          <div className="flex h-full flex-col gap-14 md:flex-row">
+            <div
+              className="flex w-max flex-col gap-5 rounded-lg border-[1px] p-5 px-8"
+              style={{ borderColor: COLOR_PALETTE2.lightblue }}
+            >
+              <h1 className="mb-3 border-b pb-2 text-lg font-bold text-gray-500">
+                Order to prepare
+              </h1>
+              {pendingOrders?.map((item, index) => {
+                return (
+                  <Link
+                    href={'/dashboard/orders'}
+                    key={index}
+                    className="w-full rounded-lg"
+                  >
+                    <p
+                      className="w-full rounded-lg p-3"
+                      style={{ backgroundColor: COLOR_PALETTE2.lightgreen }}
+                    >
+                      Order id: {item.id}
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+            <div
+              className="flex w-max flex-col gap-5 rounded-lg border-[1px] p-5 px-8"
+              style={{ borderColor: COLOR_PALETTE2.lightblue }}
+            >
+              <h1 className="mb-3 border-b pb-2 text-lg font-bold text-gray-500">
+                Order Delivering
+              </h1>
+              {deliveringOrder?.map((item, index) => {
+                return (
+                  <Link
+                    href={'/dashboard/orders'}
+                    key={index}
+                    className="w-full"
+                  >
+                    <p
+                      className="rounded-lg p-3"
+                      style={{ backgroundColor: COLOR_PALETTE2.lightgreen }}
+                    >
+                      Order id: {item.id}
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
       <Button
         className="absolute bottom-7 right-7 flex w-max gap-2 rounded-lg border-[1px] p-3 text-black hover:bg-blue-200"

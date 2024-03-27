@@ -13,7 +13,15 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react';
+import {
+  ArrowUpDown,
+  ChevronDown,
+  DeleteIcon,
+  LucideDelete,
+  MoreHorizontal,
+  RemoveFormattingIcon,
+  Trash,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -36,153 +44,137 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-const data: Payment[] = [
-  {
-    id: 'm5gr84i9',
-    amount: 316,
-    status: 'success',
-    email: 'ken99@yahoo.com',
-  },
-  {
-    id: '3u1reuv4',
-    amount: 242,
-    status: 'success',
-    email: 'Abe45@gmail.com',
-  },
-  {
-    id: 'derv1ws0',
-    amount: 837,
-    status: 'processing',
-    email: 'Monserrat44@gmail.com',
-  },
-  {
-    id: '5kma53ae',
-    amount: 874,
-    status: 'success',
-    email: 'Silas22@gmail.com',
-  },
-  {
-    id: 'bhqecj4p',
-    amount: 721,
-    status: 'failed',
-    email: 'carmella@hotmail.com',
-  },
-];
+import { Order } from '@/lib/types/supabase';
+import { COLOR_PALETTE2 } from '../variables';
+import { useToast } from '../ui/use-toast';
+import { useState } from 'react';
 
-export type Payment = {
-  id: string;
-  amount: number;
-  status: 'pending' | 'processing' | 'success' | 'failed';
-  email: string;
-};
+export function OrderTable({
+  data,
+  showData,
+}: {
+  data: Order[];
+  showData: (id: number) => void;
+}) {
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+  const [selectedRowCount, setSelectedRowCount] = useState<{
+    length: number;
+    array: number[];
+  }>({
+    length: 0,
+    array: [],
+  });
 
-export const columns: ColumnDef<Payment>[] = [
-  {
-    id: 'select',
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue('status')}</div>
-    ),
-  },
-  {
-    accessorKey: 'email',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Email
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+  React.useEffect(() => {
+    const length = Object.keys(rowSelection).length;
+    const getArrays = Object.entries(rowSelection)
+      .filter(([key, value]) => value === true)
+      .map(([key, value]) => parseInt(key, 10));
+
+    setSelectedRowCount({
+      length: length,
+      array: getArrays,
+    });
+  }, [rowSelection]);
+
+  const sendShowData = (id: number) => {
+    showData(id);
+  };
+
+  const columns: ColumnDef<Order>[] = [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue('email')}</div>,
-  },
-  {
-    accessorKey: 'amount',
-    header: () => <div className="text-right">Amount</div>,
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue('amount'));
-
-      // Format the amount as a dollar amount
-      const formatted = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(amount);
-
-      return <div className="text-right font-medium">{formatted}</div>;
+    {
+      accessorKey: 'id',
+      header: 'Order Id',
+      cell: ({ row }) => <div className="text-right">{row.getValue('id')}</div>,
     },
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: ({ row }) => {
-      const payment = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
-            >
-              Copy payment ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+    {
+      accessorKey: 'order_by',
+      header: () => <div className="text-center">User Id</div>,
+      cell: ({ row }) => {
+        return (
+          <div className="text-right font-medium">
+            {row.getValue('order_by')}
+          </div>
+        );
+      },
     },
-  },
-];
-
-export function DataTableDemo() {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      cell: ({ row }) => {
+        return <div className="capitalize">{row.getValue('status')}</div>;
+      },
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const order = row.original;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => sendShowData(order.id)}>
+                Show/Edit Order
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                style={{ backgroundColor: COLOR_PALETTE2.lightred }}
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   const table = useReactTable({
     data,
-    columns,
+    columns: columns.map((column) => ({
+      ...column,
+    })),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 7,
+      },
+    },
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
@@ -195,20 +187,42 @@ export function DataTableDemo() {
     },
   });
 
+  // const deleteSelectedMedicine = async () => {
+  //   selectedRowCount.array.forEach(async (item, index) => {
+  //     const error = await deleteOrder(data[item].id);
+  //     if (error) {
+  //       toast({
+  //         description: error?.message,
+  //       });
+  //     } else {
+  //       toast({
+  //         description: 'Medecine Deleted',
+  //       });
+  //     }
+  //   });
+  //   setRowSelection({});
+  // };
+
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex items-center gap-3 py-4">
         <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
+          placeholder="Find Medecine"
+          value={(table.getColumn('id')?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
-            table.getColumn('email')?.setFilterValue(event.target.value)
+            table.getColumn('id')?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
+          className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button
+              className="col-span-2 rounded-lg border-[1px] p-3 text-black hover:bg-blue-200"
+              style={{
+                backgroundColor: COLOR_PALETTE2.lightblue,
+                borderColor: COLOR_PALETTE2.darkblue,
+              }}
+            >
               Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -285,9 +299,20 @@ export function DataTableDemo() {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="text-muted-foreground flex-1 text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of{' '}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}{' '}
+          page(s).
         </div>
+        <Button
+          disabled={selectedRowCount.length < 1}
+          style={{
+            backgroundColor: COLOR_PALETTE2.lightred,
+            padding: 7,
+            height: '100%',
+          }}
+          // onClick={() => deleteSelectedMedicine()}
+        >
+          <Trash size={18} color={'#242424'} />
+        </Button>
         <div className="space-x-2">
           <Button
             variant="outline"
@@ -310,3 +335,6 @@ export function DataTableDemo() {
     </div>
   );
 }
+// function showData(id: number) {
+//   throw new Error('Function not implemented.');
+// }

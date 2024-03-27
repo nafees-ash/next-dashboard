@@ -1,3 +1,4 @@
+'use client';
 import SideNav from '@/components/dashboard/sidenav';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -6,7 +7,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="w-full flex-none md:w-64">
         <SideNav />
       </div>
-      <div className="my-4 ml-1 mr-3 flex-grow rounded-lg bg-gray-50 p-6 md:overflow-y-auto md:p-12">
+      <div className="my-4 ml-1 mr-3 flex-grow rounded-lg bg-gray-50 p-5 md:overflow-y-auto md:p-7">
         {children}
       </div>
     </div>
