@@ -15,8 +15,9 @@ export const MedTypeMap = {
 
 export interface Order {
   id: number;
-  medicine_id: number[];
-  order_by: [
+  medicine_id: number;
+  medicine_name: string;
+  added_by: [
     {
       id: number;
       name: string;
@@ -29,10 +30,26 @@ export interface Order {
 
 export interface SimpleCardProps {
   id: number;
+  userId?: number;
   title: string;
-  items: number[];
+  item: number;
+  medicine_id: number;
+  medicine_name: string;
   address: string;
   status: string;
+  visible?: boolean;
+  order_box?: boolean;
+  hasReminder?: boolean;
+  reminder?: string | null;
+  count?: number;
+}
+
+export interface BoxInfoProps {
+  id: number;
+  owned_by: number;
+  medicine_id: number;
+  medicine_name: string;
+  count: number;
 }
 
 export interface EditMedecineProp {
@@ -40,6 +57,7 @@ export interface EditMedecineProp {
   title: string;
   price: number;
   type: string;
+  description: string;
 }
 export interface User {
   id: number;

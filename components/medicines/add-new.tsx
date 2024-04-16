@@ -25,6 +25,7 @@ interface MedInput {
   title: string;
   price: number;
   type: 'tab' | 'cap' | 'syr' | 'gel' | 'drop';
+  description: string;
 }
 
 export function NewMedicine() {
@@ -34,6 +35,7 @@ export function NewMedicine() {
     title: '',
     price: 0,
     type: 'tab',
+    description: '',
   });
 
   const handleSubmit = async () => {
@@ -60,6 +62,7 @@ export function NewMedicine() {
       title: '',
       price: 0,
       type: 'tab',
+      description: '',
     });
   };
 
@@ -139,6 +142,18 @@ export function NewMedicine() {
                   <SelectItem value="drop">Drop</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="description">Description</Label>
+              <textarea
+                id="description"
+                name="description"
+                onChange={handleChange}
+                value={formData.description}
+                required
+                placeholder="description"
+                className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
+              />
             </div>
           </div>
         </form>

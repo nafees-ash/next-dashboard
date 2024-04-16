@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { createClient } from '@/lib/supabase/client';
 import { COLOR_PALETTE2 } from '../variables';
@@ -25,9 +25,11 @@ interface MedInput {
 export function EditMedicine({
   supabase,
   medDetails,
+  onComp,
 }: {
   supabase: SupabaseClient;
   medDetails: EditMedecineProp;
+  onComp: () => void;
 }) {
   const { toast } = useToast();
   const [buttonEnable, setButtonEnable] = useState(false);
@@ -36,6 +38,7 @@ export function EditMedicine({
     title: medDetails.title,
     price: medDetails.price,
     type: medDetails.type,
+    description: medDetails.description,
   });
 
   const handleSubmit = async () => {
@@ -50,6 +53,7 @@ export function EditMedicine({
       });
       return;
     }
+    onComp();
     toast({
       description: 'Medicine Edited.',
     });
@@ -75,6 +79,16 @@ export function EditMedicine({
       };
     });
   }
+
+  useEffect(() => {
+    setFormData({
+      id: medDetails.id,
+      title: medDetails.title,
+      price: medDetails.price,
+      type: medDetails.type,
+      description: medDetails.description,
+    });
+  }, [medDetails]);
 
   return (
     <Card className="bg-grey-50 w-[350px] pt-5">
@@ -133,6 +147,18 @@ export function EditMedicine({
                   <SelectItem value="drop">Drop</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="description">Description</Label>
+              <textarea
+                id="description"
+                name="description"
+                onChange={handleChange}
+                value={formData.description}
+                required
+                placeholder="description"
+                className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
+              />
             </div>
           </div>
         </form>

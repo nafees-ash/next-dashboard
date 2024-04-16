@@ -15,14 +15,20 @@ import { SimpleCard } from '@/components/dashboard/cards';
 export default function Page() {
   const supabase = createClient();
   const [order, setOrder] = useState<Order[]>([]);
-  const [childOrderData, setChildOrderData] = useState<Order[]>();
-  const [showOrderData, setShowOrderData] = useState({
+  const [showOrderData, setShowOrderData] = useState<SimpleCardProps>({
     id: 0,
+    userId: 0,
     title: '',
-    items: [],
+    medicine_id: 0,
+    medicine_name: '',
+    item: 0,
     status: '',
     address: '',
     visible: false,
+    order_box: false,
+    hasReminder: false,
+    reminder: null,
+    count: 0,
   });
   const [onRefresh, setResfresh] = useState<boolean>(false);
 
@@ -30,24 +36,36 @@ export default function Page() {
     setResfresh((prev) => !prev);
   };
 
-  const handleShowData = async (id: number) => {
-
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', id);
-    const user =
-      data &&
-      (await supabase.from('users').select('name').eq('id', data[0].order_by));
-    setShowOrderData({
-      id: data && data[0].id,
-      title: user?.data && user.data[0]?.name,
-      items: data && data[0].medicine_id,
-      status: data && data[0].status,
-      address: data && data[0].address,
-      visible: true,
-    });
-  };
+  const handleShowData = useCallback(
+    async (id: number) => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', id);
+      const user =
+        data &&
+        (await supabase
+          .from('users')
+          .select('name')
+          .eq('uid', data[0].added_by));
+      setShowOrderData({
+        id: data && data[0].id,
+        userId: data && data[0].added_by,
+        title: user?.data && user.data[0]?.name,
+        medicine_id: data && data[0].medicine_id,
+        medicine_name: data && data[0].medicine_name,
+        item: data && data[0].medicine_id,
+        status: data && data[0].status,
+        address: data && data[0].address,
+        order_box: data && data[0].order_box,
+        hasReminder: data && data[0].hasReminder,
+        reminder: data && data[0].reminder,
+        count: data && data[0].count,
+        visible: true,
+      });
+    },
+    [supabase],
+  );
 
   const fetchMedicines = useCallback(async () => {
     const { data: orders, error } = await supabase
@@ -63,7 +81,8 @@ export default function Page() {
 
   useEffect(() => {
     fetchMedicines();
-  }, [fetchMedicines, onRefresh]);
+    handleShowData;
+  }, [fetchMedicines, onRefresh, handleShowData]);
 
   return (
     <main className="flex h-full w-full flex-col">
@@ -75,10 +94,7 @@ export default function Page() {
       <div className="flex h-full w-full flex-col items-center justify-center gap-10 p-4 md:flex-row md:gap-20">
         <div>
           <h2 className=" mb-4 text-xl font-bold text-gray-800">All Orders</h2>
-          <OrderTable
-            data={order}
-            showData={handleShowData}
-          />
+          <OrderTable data={order} showData={handleShowData} />
         </div>
         <div>
           {showOrderData.visible && (

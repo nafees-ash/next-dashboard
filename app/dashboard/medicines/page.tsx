@@ -21,6 +21,7 @@ export default function Page() {
     type: 'tab',
     price: 0,
     visible: false,
+    description: '',
   });
 
   const refresh = () => {
@@ -30,14 +31,15 @@ export default function Page() {
   const handleEditData = async (id: number) => {
     const { data } = await supabase
       .from('medicines')
-      .select('id, title, type, price')
+      .select('id, title, type, price, description')
       .eq('id', id);
-
+    console.log(id);
     setEditData({
       id: data && data[0].id,
       title: data && data[0]?.title,
       price: data && data[0]?.price,
       type: data && data[0].type,
+      description: data && data[0].description,
       visible: true,
     });
   };
@@ -59,7 +61,7 @@ export default function Page() {
   }, [fetchMedicines, onRefresh]);
 
   return (
-    <main className="flex h-full w-full flex-col">
+    <main className="flex  w-full flex-col">
       <h1
         className={`${lusitana.className} mb-4 text-xl font-[800] md:text-3xl`}
       >
@@ -73,20 +75,24 @@ export default function Page() {
           <MedicineTable data={medecine} editMedicine={handleEditData} />
         </div>
         <div className="flex flex-col gap-10">
+          {editData && editData.visible ? (
+            <div>
+              <h2 className=" mb-4 text-xl font-bold text-gray-800">
+                Edit Medicine
+              </h2>
+              <EditMedicine
+                medDetails={editData}
+                supabase={supabase}
+                onComp={() => setEditData({ ...editData, visible: false })}
+              />
+            </div>
+          ) : null}
           <div>
             <h2 className=" mb-4 text-xl font-bold text-gray-800">
               Add New Medicine
             </h2>
             <NewMedicine />
           </div>
-          {editData.visible && (
-            <div>
-              <h2 className=" mb-4 text-xl font-bold text-gray-800">
-                Edit Medicine
-              </h2>
-              <EditMedicine medDetails={editData} supabase={supabase} />
-            </div>
-          )}
         </div>
       </div>
       <Button
