@@ -64,6 +64,15 @@ export interface User {
   name: string;
 }
 
+export interface Doctor {
+  id: number;
+  name: string;
+  schedule: string;
+  available: boolean;
+  expertise: string;
+  hospital: string;
+}
+
 // export interface Order {
 //   id: number;
 //   order_by: number;

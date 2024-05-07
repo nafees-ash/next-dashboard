@@ -8,25 +8,34 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
-import { User2Icon } from 'lucide-react';
+import {
+  BookDashed,
+  BriefcaseMedical,
+  Pill,
+  SendToBack,
+  User2Icon,
+} from 'lucide-react';
 import { COLOR_PALETTE2 } from '../variables';
-
 
 const links = [
   { name: 'Home', href: '/dashboard', icon: HomeIcon },
   {
     name: 'medicines',
     href: '/dashboard/medicines',
-    icon: DocumentDuplicateIcon,
+    icon: Pill,
   },
-  { name: 'Orders', href: '/dashboard/orders', icon: UserGroupIcon },
+  { name: 'Appointments', href: '/dashboard/appointments', icon: BookDashed },
+  { name: 'Doctors', href: '/dashboard/doctors', icon: BriefcaseMedical },
+  { name: 'Orders', href: '/dashboard/orders', icon: SendToBack },
   { name: 'Profile', href: '/dashboard/profile', icon: User2Icon },
 ];
 
 export default function NavLinks() {
   const pathname = usePathname();
   return (
-    <>      {links.map((link) => {
+    <>
+      {' '}
+      {links.map((link) => {
         const LinkIcon = link.icon;
         return (
           <Link
