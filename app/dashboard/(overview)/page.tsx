@@ -131,13 +131,13 @@ export default function Page() {
   }, [fetchDoctors, onRefresh]);
 
   return (
-    <main className="flex h-screen w-full flex-col">
+    <main className="flex h-full w-full flex-col overflow-hidden rounded-lg bg-gray-50 p-5">
       <h1
         className={`${lusitana.className} mb-4 text-xl font-[800] md:text-3xl`}
       >
         Overview
       </h1>
-      <div className="flex w-full grow flex-col items-center justify-center gap-5 p-4">
+      <div className="flex h-full w-full flex-col items-center justify-start gap-5 overflow-hidden">
         <div className="grid h-auto w-full grid-cols-1 flex-col gap-5 md:grid-cols-4">
           <div
             className="flex grow flex-col rounded-lg border-[1px] p-5"
@@ -180,11 +180,11 @@ export default function Page() {
             <p className="text-[24px]">{count.docCount}</p>
           </div>
         </div>
-        <div className="flex h-[90%] w-full flex-col rounded-lg ">
+        <div className="flex h-full w-full grow flex-col overflow-hidden rounded-lg">
           <div className="p-3">
             <h2 className="text-xl font-[800]">Quick Overview</h2>
           </div>
-          <div className="flex flex-col gap-14 md:flex-row">
+          <div className="flex h-full flex-col gap-14 overflow-hidden md:flex-row">
             <div
               className="flex w-max flex-col gap-5 overflow-auto rounded-lg border-[1px] p-5 px-8"
               style={{ borderColor: COLOR_PALETTE2.lightblue }}
@@ -270,7 +270,7 @@ export default function Page() {
               )}
             </div>
             <div
-              className="flex w-max flex-col gap-5 overflow-auto rounded-lg border-[1px] p-5 px-8"
+              className="flex h-full w-max flex-col gap-5 overflow-scroll rounded-lg border-[1px] p-5 px-8"
               style={{ borderColor: COLOR_PALETTE2.lightblue }}
             >
               <h1 className="mb-3 border-b pb-2 text-lg font-bold text-gray-500">
@@ -280,7 +280,7 @@ export default function Page() {
                 doctorActive?.map((item, index) => {
                   return (
                     <Link
-                      href={'/dashboard/orders'}
+                      href={'/dashboard/doctors'}
                       key={index}
                       className="w-full"
                     >

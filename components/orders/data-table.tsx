@@ -172,7 +172,7 @@ export function OrderTable({
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: {
-        pageSize: 7,
+        pageSize: 4,
       },
     },
     getSortedRowModel: getSortedRowModel(),
@@ -204,7 +204,7 @@ export function OrderTable({
   // };
 
   return (
-    <div className="w-full">
+    <div className="h-full w-full overflow-auto pb-10">
       <div className="flex items-center gap-3 py-4">
         <Input
           placeholder="Find Medecine"

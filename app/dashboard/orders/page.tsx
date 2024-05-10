@@ -85,22 +85,23 @@ export default function Page() {
   }, [fetchMedicines, onRefresh, handleShowData]);
 
   return (
-    <main className="flex h-full w-full flex-col">
+    <main className="flex h-full w-full flex-col overflow-hidden">
       <h1
         className={`${lusitana.className} mb-4 text-xl font-[800] md:text-3xl`}
       >
         Orders
       </h1>
-      <div className="flex h-full w-full flex-col items-center justify-center gap-10 p-4 md:gap-20 py-4">
-        <div className="w-[70%]">
+      <div className="flex h-full w-full flex-col items-center justify-center gap-10 overflow-hidden p-4 py-4 md:gap-20">
+        <div className="h-full w-[70%] overflow-hidden">
           <h2 className=" mb-4 text-xl font-bold text-gray-800">All Orders</h2>
           <OrderTable data={order} showData={handleShowData} />
         </div>
-        <div className="w-[70%]">
-          {showOrderData.visible && (
+
+        {showOrderData.visible && (
+          <div className="h-full w-[70%] overflow-hidden">
             <SimpleCard simpleCardData={showOrderData} supabase={supabase} />
-          )}
-        </div>
+          </div>
+        )}
       </div>
       <Button
         className="absolute bottom-7 right-7 flex w-max gap-2 rounded-lg border-[1px] p-3 text-black hover:bg-blue-200"
