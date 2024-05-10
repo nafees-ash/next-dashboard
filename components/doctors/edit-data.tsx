@@ -14,36 +14,32 @@ import { useToast } from '@/components/ui/use-toast';
 import { createClient } from '@/lib/supabase/client';
 import { COLOR_PALETTE2 } from '../variables';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EditMedecineProp } from '@/lib/types/supabase';
+import { Doctor, EditMedecineProp } from '@/lib/types/supabase';
 
-interface MedInput {
-  title: string;
-  price: number;
-  type: 'tab' | 'cap' | 'syr' | 'gel' | 'drop';
-}
-
-export function EditMedicine({
+export function EditDoctor({
   supabase,
-  medDetails,
+  docDetails,
   onComp,
 }: {
   supabase: SupabaseClient;
-  medDetails: EditMedecineProp;
+  docDetails: Doctor;
   onComp: () => void;
 }) {
   const { toast } = useToast();
   const [buttonEnable, setButtonEnable] = useState(false);
-  const [formData, setFormData] = useState<EditMedecineProp>({
-    id: medDetails.id,
-    title: medDetails.title,
-    price: medDetails.price,
-    type: medDetails.type,
-    description: medDetails.description,
+  const [formData, setFormData] = useState<Doctor>({
+    id: docDetails.id,
+    name: docDetails.name,
+    schedule: docDetails.schedule,
+    available: docDetails.available,
+    expertise: docDetails.expertise,
+    hospital: docDetails.hospital,
+    degree: docDetails.degree,
   });
 
   const handleSubmit = async () => {
     const { data: _, error } = await supabase
-      .from('medicines')
+      .from('doctors')
       .update(formData)
       .eq('id', formData.id);
 
@@ -55,7 +51,7 @@ export function EditMedicine({
     }
     onComp();
     toast({
-      description: 'Medicine Edited.',
+      description: 'Doctor Added.',
     });
   };
 
@@ -68,70 +64,71 @@ export function EditMedicine({
       };
     });
   }
-  function handleSelectChange(
-    value: 'tab' | 'cap' | 'syr' | 'gel' | 'drop',
-  ): void {
+  function handleSelectChange(value: any): void {
     setButtonEnable(true);
+    console.log(value);
     setFormData((prevFormData) => {
       return {
         ...prevFormData,
-        type: value,
+        available: value === 'true',
       };
     });
   }
 
   useEffect(() => {
     setFormData({
-      id: medDetails.id,
-      title: medDetails.title,
-      price: medDetails.price,
-      type: medDetails.type,
-      description: medDetails.description,
+      id: docDetails.id,
+      name: docDetails.name,
+      schedule: docDetails.schedule,
+      available: docDetails.available,
+      expertise: docDetails.expertise,
+      hospital: docDetails.hospital,
+      degree: docDetails.degree,
     });
-  }, [medDetails]);
+  }, [docDetails]);
 
   return (
-    <Card className="bg-grey-50 pt-5">
+    <Card className="bg-grey-50 w-full pt-5">
       <CardContent>
         <form>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="name">Title</Label>
+              <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
-                name="title"
-                placeholder="Name of the Medicine"
+                name="name"
+                placeholder="Name of the Doctor"
                 onChange={handleChange}
-                value={formData.title}
+                value={formData.name}
                 required
                 className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
               />
             </div>
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="price">Price</Label>
+              <Label htmlFor="price">Degree</Label>
               <Input
-                id="price"
-                name="price"
-                type="number"
-                placeholder="How much per unit"
-                value={formData.price}
+                id="expertise"
+                name="expertise"
+                type="text"
+                placeholder="Expertise"
+                value={formData.expertise}
                 onChange={handleChange}
                 required
                 className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
               />
             </div>
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="framework">Type</Label>
+              <Label htmlFor="available">Available</Label>
               <Select
-                onValueChange={(
-                  value: 'tab' | 'cap' | 'syr' | 'gel' | 'drop',
-                ) => handleSelectChange(value)}
-                value={formData.type}
+                onValueChange={(value: 'false' | 'true') =>
+                  handleSelectChange(value)
+                }
+                value={formData.available.toString()}
                 required
               >
                 <SelectTrigger
-                  id="type"
-                  name="type"
+                  id="available"
+                  name="available"
                   className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
                 >
                   <SelectValue
@@ -140,25 +137,10 @@ export function EditMedicine({
                   />
                 </SelectTrigger>
                 <SelectContent position="popper">
-                  <SelectItem value="tab">Tablet</SelectItem>
-                  <SelectItem value="syr">Syrup</SelectItem>
-                  <SelectItem value="cap">Capsule</SelectItem>
-                  <SelectItem value="gel">Gel</SelectItem>
-                  <SelectItem value="drop">Drop</SelectItem>
+                  <SelectItem value="false">No</SelectItem>
+                  <SelectItem value="true">Yes</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="description">Description</Label>
-              <textarea
-                id="description"
-                name="description"
-                onChange={handleChange}
-                value={formData.description}
-                required
-                placeholder="description"
-                className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
-              />
             </div>
           </div>
         </form>

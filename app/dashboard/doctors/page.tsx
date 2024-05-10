@@ -3,15 +3,15 @@
 import { createClient } from '@/lib/supabase/client';
 import { useCallback, useEffect, useState } from 'react';
 import { Doctor, Medicines } from '@/lib/types/supabase';
-import { MedicineTable } from '@/components/medicines/data-table';
-import { NewMedicine } from '@/components/medicines/add-new';
+
 import { lusitana } from '@/components/fonts';
 import { Button } from '@/components/button';
 import { COLOR_PALETTE2 } from '@/components/variables';
 import { RefreshCcwIcon } from 'lucide-react';
-import { EditMedicine } from '@/components/medicines/edit-medicine';
+
 import { DoctorTable } from '@/components/doctors/data-table';
 import { NewDoctor } from '@/components/doctors/add-new';
+import { EditDoctor } from '@/components/doctors/edit-data';
 
 export default function Page() {
   const supabase = createClient();
@@ -19,11 +19,13 @@ export default function Page() {
   const [onRefresh, setResfresh] = useState<boolean>(false);
   const [editData, setEditData] = useState({
     id: 0,
-    title: '',
-    type: 'tab',
-    price: 0,
+    name: '',
+    schedule: '',
+    available: true,
+    expertise: '',
+    hospital: '',
+    degree: '',
     visible: false,
-    description: '',
   });
 
   const refresh = () => {
@@ -32,16 +34,18 @@ export default function Page() {
 
   const handleEditData = async (id: number) => {
     const { data } = await supabase
-      .from('medicines')
-      .select('id, title, type, price, description')
+      .from('doctors')
+      .select('id, name, degree, expertise, available, hospital, schedule ')
       .eq('id', id);
     console.log(id);
     setEditData({
       id: data && data[0].id,
-      title: data && data[0]?.title,
-      price: data && data[0]?.price,
-      type: data && data[0].type,
-      description: data && data[0].description,
+      name: data && data[0]?.name,
+      schedule: data && data[0]?.schedule,
+      available: data && data[0].available,
+      degree: data && data[0].degree,
+      expertise: data && data[0].expertise,
+      hospital: data && data[0].hospital,
       visible: true,
     });
   };
@@ -67,23 +71,21 @@ export default function Page() {
       <h1
         className={`${lusitana.className} mb-4 text-xl font-[800] md:text-3xl`}
       >
-        Medicines
+        Doctor
       </h1>
       <div className="flex h-full w-full flex-col items-center justify-center gap-10 p-4 md:gap-20">
         <div className="w-[70%]">
-          <h2 className=" mb-4 text-xl font-bold text-gray-800">
-            All Medicines
-          </h2>
-          <DoctorTable data={doctors} editMedicine={handleEditData} />
+          <h2 className=" mb-4 text-xl font-bold text-gray-800">All Doctor</h2>
+          <DoctorTable data={doctors} editDoctor={handleEditData} />
         </div>
         <div className="flex min-w-[70%] flex-col gap-10">
           {editData && editData.visible ? (
             <div>
               <h2 className=" mb-4 text-xl font-bold text-gray-800">
-                Edit Medicine
+                Edit Doctor
               </h2>
-              <EditMedicine
-                medDetails={editData}
+              <EditDoctor
+                docDetails={editData}
                 supabase={supabase}
                 onComp={() => setEditData({ ...editData, visible: false })}
               />
@@ -91,7 +93,7 @@ export default function Page() {
           ) : null}
           <div className="w-full">
             <h2 className=" mb-4 text-xl font-bold text-gray-800">
-              Add New Medicine
+              Add New Doctor
             </h2>
             <NewDoctor />
           </div>

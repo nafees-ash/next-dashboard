@@ -110,15 +110,15 @@ export function OrderTable({
     {
       accessorKey: 'id',
       header: 'Order Id',
-      cell: ({ row }) => <div className="text-right">{row.getValue('id')}</div>,
+      cell: ({ row }) => <div className="">{row.getValue('id')}</div>,
     },
     {
-      accessorKey: 'order_by',
+      accessorKey: 'added_by',
       header: () => <div className="text-center">User Id</div>,
       cell: ({ row }) => {
         return (
           <div className="text-right font-medium">
-            {row.getValue('order_by')}
+            {row.getValue('added_by')}
           </div>
         );
       },

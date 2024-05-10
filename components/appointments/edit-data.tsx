@@ -14,36 +14,30 @@ import { useToast } from '@/components/ui/use-toast';
 import { createClient } from '@/lib/supabase/client';
 import { COLOR_PALETTE2 } from '../variables';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { EditMedecineProp } from '@/lib/types/supabase';
+import { Appointment, EditMedecineProp } from '@/lib/types/supabase';
 
-interface MedInput {
-  title: string;
-  price: number;
-  type: 'tab' | 'cap' | 'syr' | 'gel' | 'drop';
-}
-
-export function EditMedicine({
+export function EditAppointment({
   supabase,
-  medDetails,
+  apointpDetails,
   onComp,
 }: {
   supabase: SupabaseClient;
-  medDetails: EditMedecineProp;
+  apointpDetails: Appointment;
   onComp: () => void;
 }) {
   const { toast } = useToast();
   const [buttonEnable, setButtonEnable] = useState(false);
-  const [formData, setFormData] = useState<EditMedecineProp>({
-    id: medDetails.id,
-    title: medDetails.title,
-    price: medDetails.price,
-    type: medDetails.type,
-    description: medDetails.description,
+  const [formData, setFormData] = useState<Appointment>({
+    id: apointpDetails.id,
+    booked_by: apointpDetails.booked_by,
+    doctor: apointpDetails.doctor,
+    doctor_name: apointpDetails.doctor_name,
+    done: apointpDetails.done,
   });
 
   const handleSubmit = async () => {
     const { data: _, error } = await supabase
-      .from('medicines')
+      .from('appointments')
       .update(formData)
       .eq('id', formData.id);
 
@@ -55,7 +49,7 @@ export function EditMedicine({
     }
     onComp();
     toast({
-      description: 'Medicine Edited.',
+      description: 'Appointment Added.',
     });
   };
 
@@ -68,70 +62,55 @@ export function EditMedicine({
       };
     });
   }
-  function handleSelectChange(
-    value: 'tab' | 'cap' | 'syr' | 'gel' | 'drop',
-  ): void {
+  function handleSelectChange(value: any): void {
     setButtonEnable(true);
+    console.log(value);
     setFormData((prevFormData) => {
       return {
         ...prevFormData,
-        type: value,
+        done: value === 'true',
       };
     });
   }
 
   useEffect(() => {
     setFormData({
-      id: medDetails.id,
-      title: medDetails.title,
-      price: medDetails.price,
-      type: medDetails.type,
-      description: medDetails.description,
+      id: apointpDetails.id,
+      booked_by: apointpDetails.booked_by,
+      doctor: apointpDetails.doctor,
+      doctor_name: apointpDetails.doctor_name,
+      done: apointpDetails.done,
     });
-  }, [medDetails]);
+  }, [apointpDetails]);
 
   return (
-    <Card className="bg-grey-50 w-[350px] pt-5">
+    <Card className="bg-grey-50 w-full pt-5">
       <CardContent>
         <form>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="name">Title</Label>
+              <Label htmlFor="price">Serial No.</Label>
               <Input
-                id="name"
-                name="title"
-                placeholder="Name of the Medicine"
-                onChange={handleChange}
-                value={formData.title}
-                required
-                className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
+                id="id"
+                name="id"
+                type="text"
+                placeholder="Serial No."
+                disabled
+                value={formData.id}
               />
             </div>
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="price">Price</Label>
-              <Input
-                id="price"
-                name="price"
-                type="number"
-                placeholder="How much per unit"
-                value={formData.price}
-                onChange={handleChange}
-                required
-                className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
-              />
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="framework">Type</Label>
+              <Label htmlFor="done">Status</Label>
               <Select
-                onValueChange={(
-                  value: 'tab' | 'cap' | 'syr' | 'gel' | 'drop',
-                ) => handleSelectChange(value)}
-                value={formData.type}
+                onValueChange={(value: 'false' | 'true') =>
+                  handleSelectChange(value)
+                }
+                value={formData.done.toString()}
                 required
               >
                 <SelectTrigger
-                  id="type"
-                  name="type"
+                  id="done"
+                  name="done"
                   className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
                 >
                   <SelectValue
@@ -140,25 +119,10 @@ export function EditMedicine({
                   />
                 </SelectTrigger>
                 <SelectContent position="popper">
-                  <SelectItem value="tab">Tablet</SelectItem>
-                  <SelectItem value="syr">Syrup</SelectItem>
-                  <SelectItem value="cap">Capsule</SelectItem>
-                  <SelectItem value="gel">Gel</SelectItem>
-                  <SelectItem value="drop">Drop</SelectItem>
+                  <SelectItem value="false">Pending</SelectItem>
+                  <SelectItem value="true">Done</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="description">Description</Label>
-              <textarea
-                id="description"
-                name="description"
-                onChange={handleChange}
-                value={formData.description}
-                required
-                placeholder="description"
-                className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
-              />
             </div>
           </div>
         </form>

@@ -21,26 +21,28 @@ import { useToast } from '@/components/ui/use-toast';
 import { createClient } from '@/lib/supabase/client';
 import { COLOR_PALETTE2 } from '../variables';
 
-interface MedInput {
-  title: string;
-  price: number;
-  type: 'tab' | 'cap' | 'syr' | 'gel' | 'drop';
-  description: string;
+interface DocInput {
+  name: string;
+  hospital: string;
+  expertise: string;
+  schedule: string;
+  degree: string;
 }
 
-export function NewMedicine() {
+export function NewAppointment() {
   const { toast } = useToast();
   const supabase = createClient();
-  const [formData, setFormData] = useState<MedInput>({
-    title: '',
-    price: 0,
-    type: 'tab',
-    description: '',
+  const [formData, setFormData] = useState<DocInput>({
+    name: '',
+    hospital: '',
+    expertise: '',
+    schedule: '',
+    degree: '',
   });
 
   const handleSubmit = async () => {
     const { data: _, error } = await supabase
-      .from('medicines')
+      .from('appointments')
       .insert(formData)
       .select()
       .single();
@@ -53,16 +55,17 @@ export function NewMedicine() {
     }
     clearform();
     toast({
-      description: 'Medicine added.',
+      description: 'Appointment added.',
     });
   };
 
   const clearform = () => {
     setFormData({
-      title: '',
-      price: 0,
-      type: 'tab',
-      description: '',
+      name: '',
+      hospital: '',
+      expertise: '',
+      schedule: '',
+      degree: '',
     });
   };
 
@@ -74,84 +77,73 @@ export function NewMedicine() {
       };
     });
   }
-  function handleSelectChange(
-    value: 'tab' | 'cap' | 'syr' | 'gel' | 'drop',
-  ): void {
-    setFormData((prevFormData) => {
-      return {
-        ...prevFormData,
-        type: value,
-      };
-    });
-  }
 
   return (
-    <Card className="bg-grey-50 pt-5">
+    <Card className="bg-grey-50 w-full pt-5">
       <CardContent>
         <form>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="name">Title</Label>
+              <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
-                name="title"
-                placeholder="Name of the Medicine"
+                name="name"
+                placeholder="Name of the Appointment"
                 onChange={handleChange}
-                value={formData.title}
+                value={formData.name}
                 required
                 className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
               />
             </div>
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="price">Price</Label>
+              <Label htmlFor="price">Degree</Label>
               <Input
-                id="price"
-                name="price"
-                type="number"
-                placeholder="How much per unit"
-                value={formData.price}
+                id="degree"
+                name="degree"
+                type="text"
+                placeholder="degree"
+                value={formData.degree}
                 onChange={handleChange}
                 required
                 className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
               />
             </div>
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="framework">Type</Label>
-              <Select
-                onValueChange={(
-                  value: 'tab' | 'cap' | 'syr' | 'gel' | 'drop',
-                ) => handleSelectChange(value)}
-                value={formData.type}
+              <Label htmlFor="price">Hospital</Label>
+              <Input
+                id="hospital"
+                name="hospital"
+                type="text"
+                placeholder="Hospital"
+                value={formData.hospital}
+                onChange={handleChange}
                 required
-              >
-                <SelectTrigger
-                  id="type"
-                  name="type"
-                  className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
-                >
-                  <SelectValue
-                    placeholder="Select"
-                    className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
-                  />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  <SelectItem value="tab">Tablet</SelectItem>
-                  <SelectItem value="syr">Syrup</SelectItem>
-                  <SelectItem value="cap">Capsule</SelectItem>
-                  <SelectItem value="gel">Gel</SelectItem>
-                  <SelectItem value="drop">Drop</SelectItem>
-                </SelectContent>
-              </Select>
+                className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
+              />
             </div>
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="description">Description</Label>
-              <textarea
-                id="description"
-                name="description"
+              <Label htmlFor="price">Expertise</Label>
+              <Input
+                id="expertise"
+                name="expertise"
+                type="text"
+                placeholder="expertise"
+                value={formData.expertise}
                 onChange={handleChange}
-                value={formData.description}
                 required
-                placeholder="description"
+                className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="price">Schedule</Label>
+              <Input
+                id="schedule"
+                name="schedule"
+                type="text"
+                placeholder="schedule"
+                value={formData.schedule}
+                onChange={handleChange}
+                required
                 className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
               />
             </div>
@@ -176,7 +168,7 @@ export function NewMedicine() {
             borderColor: COLOR_PALETTE2.darkblue,
           }}
           onClick={handleSubmit}
-          disabled={formData.title ? false : true}
+          disabled={formData.name ? false : true}
         >
           Add
         </Button>

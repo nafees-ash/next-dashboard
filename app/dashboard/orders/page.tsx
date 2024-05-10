@@ -91,12 +91,12 @@ export default function Page() {
       >
         Orders
       </h1>
-      <div className="flex h-full w-full flex-col items-center justify-center gap-10 p-4 md:flex-row md:gap-20">
-        <div>
+      <div className="flex h-full w-full flex-col items-center justify-center gap-10 p-4 md:gap-20 py-4">
+        <div className="w-[70%]">
           <h2 className=" mb-4 text-xl font-bold text-gray-800">All Orders</h2>
           <OrderTable data={order} showData={handleShowData} />
         </div>
-        <div>
+        <div className="w-[70%]">
           {showOrderData.visible && (
             <SimpleCard simpleCardData={showOrderData} supabase={supabase} />
           )}

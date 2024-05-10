@@ -59,6 +59,15 @@ export interface EditMedecineProp {
   type: string;
   description: string;
 }
+
+// export interface EditAppointmentProp {
+//   id: number;
+//   title: string;
+//   price: number;
+//   type: string;
+//   description: string;
+// }
+
 export interface User {
   id: number;
   name: string;
@@ -71,8 +80,16 @@ export interface Doctor {
   available: boolean;
   expertise: string;
   hospital: string;
+  degree: string;
 }
 
+export interface Appointment {
+  id: number;
+  booked_by: string;
+  doctor: number;
+  doctor_name: string;
+  done: boolean;
+}
 // export interface Order {
 //   id: number;
 //   order_by: number;

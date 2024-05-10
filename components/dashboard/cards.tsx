@@ -134,7 +134,7 @@ export function SimpleCard({
   }, [simpleCardData]);
 
   return (
-    <Card className="bg-grey-50 w-[350px] pt-5">
+    <Card className="bg-grey-50 w-full pt-5">
       <CardContent>
         <h2 className=" text-lefst border-b pb-2 text-lg font-bold">
           Items Details

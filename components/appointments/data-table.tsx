@@ -44,7 +44,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { Doctor } from '@/lib/types/supabase';
+import { Appointment } from '@/lib/types/supabase';
 import { COLOR_PALETTE2 } from '../variables';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '../ui/use-toast';
@@ -52,16 +52,19 @@ import { useToast } from '../ui/use-toast';
 const supabase = createClient();
 
 const deleteMedicine = async (id: number) => {
-  const { data, error } = await supabase.from('doctors').delete().eq('id', id);
+  const { data, error } = await supabase
+    .from('appointments')
+    .delete()
+    .eq('id', id);
   return error;
 };
 
-export function DoctorTable({
+export function AppointmentTable({
   data,
-  editDoctor,
+  editAppointment,
 }: {
-  data: Doctor[];
-  editDoctor: (id: number) => Promise<void>;
+  data: Appointment[];
+  editAppointment: (id: number) => void;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -91,7 +94,7 @@ export function DoctorTable({
     });
   }, [rowSelection]);
 
-  const columns: ColumnDef<Doctor>[] = [
+  const columns: ColumnDef<Appointment>[] = [
     {
       id: 'select',
       header: ({ table }) => (
@@ -117,33 +120,33 @@ export function DoctorTable({
       enableHiding: false,
     },
     {
-      accessorKey: 'name',
-      header: 'Name',
-      cell: ({ row }) => (
-        <div className="capitalize">{row.getValue('name')}</div>
-      ),
+      accessorKey: 'id',
+      header: 'Serial No.',
+      cell: ({ row }) => <div className="capitalize">{row.getValue('id')}</div>,
     },
     {
-      accessorKey: 'expertise',
-      header: () => <div className="text-left">Expertise</div>,
+      accessorKey: 'doctor_name',
+      header: () => <div className="text-left">Doctor Name</div>,
       cell: ({ row }) => {
-        return <div className="text-left">{row.getValue('expertise')}</div>;
+        return <div className="text-left">{row.getValue('doctor_name')}</div>;
       },
     },
     {
-      accessorKey: 'available',
-      header: 'Available',
-      cell: ({ row }) => (
-        <div className="capitalize">
-          {row.getValue('available') === true ? 'yes' : 'No'}
-        </div>
-      ),
+      accessorKey: 'done',
+      header: () => <div className="text-left">Status</div>,
+      cell: ({ row }) => {
+        return (
+          <div className="text-left">
+            {row.getValue('done') ? 'Done' : 'Pending'}
+          </div>
+        );
+      },
     },
     {
       id: 'actions',
       enableHiding: false,
       cell: ({ row }) => {
-        const doctors = row.original;
+        const appointment = row.original;
 
         const deleteOptionMedicine = async (id: number) => {
           const error = await deleteMedicine(id);
@@ -163,16 +166,10 @@ export function DoctorTable({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => editDoctor(doctors.id)}>
-                Edit Doctor
+              <DropdownMenuItem onClick={() => editAppointment(appointment.id)}>
+                Edit Appointment
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => deleteOptionMedicine(doctors.id)}
-                style={{ backgroundColor: COLOR_PALETTE2.lightred }}
-              >
-                Delete
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -225,10 +222,10 @@ export function DoctorTable({
     <div className="w-full">
       <div className="flex items-center gap-3 py-4">
         <Input
-          placeholder="Find Doctor"
-          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+          placeholder="Find Appointment"
+          value={(table.getColumn('id')?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
-            table.getColumn('name')?.setFilterValue(event.target.value)
+            table.getColumn('id')?.setFilterValue(event.target.value)
           }
           className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
         />

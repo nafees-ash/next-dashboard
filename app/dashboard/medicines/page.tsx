@@ -67,14 +67,14 @@ export default function Page() {
       >
         Medicines
       </h1>
-      <div className="flex h-full w-full flex-col items-center justify-center gap-10 p-4 md:flex-row md:gap-20">
-        <div>
+      <div className="flex h-full w-full flex-col items-center justify-center gap-10 p-4 md:gap-20">
+        <div className="w-[70%]">
           <h2 className=" mb-4 text-xl font-bold text-gray-800">
             All Medicines
           </h2>
           <MedicineTable data={medecine} editMedicine={handleEditData} />
         </div>
-        <div className="flex flex-col gap-10">
+        <div className="flex min-w-[70%] flex-col  gap-10">
           {editData && editData.visible ? (
             <div>
               <h2 className=" mb-4 text-xl font-bold text-gray-800">
@@ -87,7 +87,7 @@ export default function Page() {
               />
             </div>
           ) : null}
-          <div>
+          <div className="w-full">
             <h2 className=" mb-4 text-xl font-bold text-gray-800">
               Add New Medicine
             </h2>

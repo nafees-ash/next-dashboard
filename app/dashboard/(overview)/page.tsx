@@ -11,7 +11,7 @@ interface CountObject {
   userCount: number;
   totalMedicine: number;
   totalOrder: number;
-  pendingOrder: number;
+  docCount: number;
 }
 
 export default function Page() {
@@ -21,10 +21,12 @@ export default function Page() {
     userCount: 0,
     totalMedicine: 0,
     totalOrder: 0,
-    pendingOrder: 0,
+    docCount: 0,
   });
   const [pendingOrders, setPendingOrders] = useState<any[]>();
   const [deliveringOrder, setDeliveringOrders] = useState<any[]>();
+  const [appointmentPending, setAppointmentPending] = useState<any[]>();
+  const [doctorActive, setDoctorActive] = useState<any[]>();
 
   const refresh = () => {
     setResfresh((prev) => !prev);
@@ -37,22 +39,19 @@ export default function Page() {
         .select('*');
       const { data: allOrdersData } = await supabase.from('orders').select('*');
       const { data: pendingOrdersData } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('status', 'pending');
+        .from('doctors')
+        .select('*');
 
       const totalUserCount = userData ? userData.length : 0;
       const totalMedicineCount = medicinesData ? medicinesData.length : 0;
       const totalOrderCount = allOrdersData ? allOrdersData.length : 0;
-      const pendingOrderCount = pendingOrdersData
-        ? pendingOrdersData.length
-        : 0;
+      const docCount = pendingOrdersData ? pendingOrdersData.length : 0;
 
       setCount({
         userCount: totalUserCount,
         totalMedicine: totalMedicineCount,
         totalOrder: totalOrderCount,
-        pendingOrder: pendingOrderCount,
+        docCount,
       });
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -97,15 +96,49 @@ export default function Page() {
     fetchDelivering();
   }, [fetchDelivering, onRefresh]);
 
+  const fetchAppointment = useCallback(async () => {
+    const { data: apps, error } = await supabase
+      .from('appointments')
+      .select('id')
+      .eq('done', false)
+      .order('id', { ascending: true });
+    if (error) {
+      console.log('DelError', error);
+    } else {
+      setAppointmentPending(apps);
+    }
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchAppointment();
+  }, [fetchAppointment, onRefresh]);
+
+  const fetchDoctors = useCallback(async () => {
+    const { data: docs, error } = await supabase
+      .from('doctors')
+      .select('name')
+      .eq('available', true)
+      .order('id', { ascending: true });
+    if (error) {
+      console.log('DelError', error);
+    } else {
+      setDoctorActive(docs);
+    }
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchDoctors();
+  }, [fetchDoctors, onRefresh]);
+
   return (
-    <main className="flex h-full w-full flex-col">
+    <main className="flex h-screen w-full flex-col">
       <h1
         className={`${lusitana.className} mb-4 text-xl font-[800] md:text-3xl`}
       >
         Overview
       </h1>
-      <div className="flex h-full w-full flex-col items-center justify-center gap-5 p-4">
-        <div className="flex w-full flex-col gap-5 md:flex-row">
+      <div className="flex w-full grow flex-col items-center justify-center gap-5 p-4">
+        <div className="grid h-auto w-full grid-cols-1 flex-col gap-5 md:grid-cols-4">
           <div
             className="flex grow flex-col rounded-lg border-[1px] p-5"
             style={{
@@ -114,7 +147,7 @@ export default function Page() {
             }}
           >
             <h2 className="font-[800]">Total User</h2>
-            <p className="text-[24px]">{count.pendingOrder}</p>
+            <p className="text-[24px]">{count.userCount}</p>
           </div>
           <div
             className="flex grow flex-col rounded-lg border-[1px] p-5"
@@ -143,62 +176,126 @@ export default function Page() {
               backgroundColor: COLOR_PALETTE2.lightblue,
             }}
           >
-            <h2 className="font-[800]">Pending Order</h2>
-            <p className="text-[24px]">{count.pendingOrder}</p>
+            <h2 className="font-[800]">Total Doctors</h2>
+            <p className="text-[24px]">{count.docCount}</p>
           </div>
         </div>
-        <div className="flex h-full w-full flex-col rounded-lg ">
+        <div className="flex h-[90%] w-full flex-col rounded-lg ">
           <div className="p-3">
             <h2 className="text-xl font-[800]">Quick Overview</h2>
           </div>
-          <div className="flex h-full flex-col gap-14 md:flex-row">
+          <div className="flex flex-col gap-14 md:flex-row">
             <div
-              className="flex w-max flex-col gap-5 rounded-lg border-[1px] p-5 px-8"
+              className="flex w-max flex-col gap-5 overflow-auto rounded-lg border-[1px] p-5 px-8"
               style={{ borderColor: COLOR_PALETTE2.lightblue }}
             >
               <h1 className="mb-3 border-b pb-2 text-lg font-bold text-gray-500">
                 Order to prepare
               </h1>
-              {pendingOrders?.map((item, index) => {
-                return (
-                  <Link
-                    href={'/dashboard/orders'}
-                    key={index}
-                    className="w-full rounded-lg"
-                  >
-                    <p
-                      className="w-full rounded-lg p-3"
-                      style={{ backgroundColor: COLOR_PALETTE2.lightgreen }}
+              {pendingOrders && pendingOrders?.length ? (
+                pendingOrders?.map((item, index) => {
+                  return (
+                    <Link
+                      href={'/dashboard/orders'}
+                      key={index}
+                      className="w-full rounded-lg"
                     >
-                      Order id: {item.id}
-                    </p>
-                  </Link>
-                );
-              })}
+                      <p
+                        className="w-full rounded-lg p-3"
+                        style={{ backgroundColor: COLOR_PALETTE2.lightgreen }}
+                      >
+                        Order id: {item.id}
+                      </p>
+                    </Link>
+                  );
+                })
+              ) : (
+                <p>No Pending Orders</p>
+              )}
             </div>
             <div
-              className="flex w-max flex-col gap-5 rounded-lg border-[1px] p-5 px-8"
+              className="flex w-max flex-col gap-5 overflow-auto rounded-lg border-[1px] p-5 px-8"
               style={{ borderColor: COLOR_PALETTE2.lightblue }}
             >
               <h1 className="mb-3 border-b pb-2 text-lg font-bold text-gray-500">
                 Order Delivering
               </h1>
-              {deliveringOrder?.map((item, index) => {
-                return (
-                  <Link
-                    href={'/dashboard/orders'}
-                    key={index}
-                    className="w-full"
-                  >
-                    <p
-                      className="rounded-lg p-3"
-                      style={{ backgroundColor: COLOR_PALETTE2.lightgreen }}
+              {deliveringOrder && deliveringOrder?.length ? (
+                deliveringOrder?.map((item, index) => {
+                  return (
+                    <Link
+                      href={'/dashboard/orders'}
+                      key={index}
+                      className="w-full"
                     >
-                      Order id: {item.id}
-                    </p>
-                  </Link>
-                );
-              })}
+                      <p
+                        className="rounded-lg p-3"
+                        style={{ backgroundColor: COLOR_PALETTE2.lightgreen }}
+                      >
+                        Order id: {item.id}
+                      </p>
+                    </Link>
+                  );
+                })
+              ) : (
+                <p>No Order</p>
+              )}
+            </div>
+            <div
+              className="flex w-max flex-col gap-5 overflow-auto rounded-lg border-[1px] p-5 px-8"
+              style={{ borderColor: COLOR_PALETTE2.lightblue }}
+            >
+              <h1 className="mb-3 border-b pb-2 text-lg font-bold text-gray-500">
+                Appointment Pending
+              </h1>
+              {appointmentPending && appointmentPending?.length ? (
+                appointmentPending?.map((item, index) => {
+                  return (
+                    <Link
+                      href={'/dashboard/appointments'}
+                      key={index}
+                      className="w-full"
+                    >
+                      <p
+                        className="rounded-lg p-3"
+                        style={{ backgroundColor: COLOR_PALETTE2.lightgreen }}
+                      >
+                        Serial id: {item.id}
+                      </p>
+                    </Link>
+                  );
+                })
+              ) : (
+                <p>No appointments</p>
+              )}
+            </div>
+            <div
+              className="flex w-max flex-col gap-5 overflow-auto rounded-lg border-[1px] p-5 px-8"
+              style={{ borderColor: COLOR_PALETTE2.lightblue }}
+            >
+              <h1 className="mb-3 border-b pb-2 text-lg font-bold text-gray-500">
+                Doctor Active
+              </h1>
+              {doctorActive && doctorActive?.length ? (
+                doctorActive?.map((item, index) => {
+                  return (
+                    <Link
+                      href={'/dashboard/orders'}
+                      key={index}
+                      className="w-full"
+                    >
+                      <p
+                        className="rounded-lg p-3"
+                        style={{ backgroundColor: COLOR_PALETTE2.lightgreen }}
+                      >
+                        Doctor id: {item.name}
+                      </p>
+                    </Link>
+                  );
+                })
+              ) : (
+                <p>No Doctor Active</p>
+              )}
             </div>
           </div>
         </div>

@@ -46,7 +46,7 @@ export default function ChangePass() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="grid w-[90%] items-center gap-x-10 gap-y-7 rounded-lg border-[1px] p-10 md:w-[70%] "
+      className="grid w-full items-center gap-x-10 gap-y-7 rounded-lg border-[1px] p-10"
       style={{
         gridTemplateColumns: '30% 60%',
         borderColor: COLOR_PALETTE2.lightblue,

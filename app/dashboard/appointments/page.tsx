@@ -2,26 +2,27 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { useCallback, useEffect, useState } from 'react';
-import { Medicines } from '@/lib/types/supabase';
-import { MedicineTable } from '@/components/medicines/data-table';
-import { NewMedicine } from '@/components/medicines/add-new';
+import { Appointment, Medicines } from '@/lib/types/supabase';
+
 import { lusitana } from '@/components/fonts';
 import { Button } from '@/components/button';
 import { COLOR_PALETTE2 } from '@/components/variables';
 import { RefreshCcwIcon } from 'lucide-react';
-import { EditMedicine } from '@/components/medicines/edit-medicine';
+
+import { AppointmentTable } from '@/components/appointments/data-table';
+import { EditAppointment } from '@/components/appointments/edit-data';
 
 export default function Page() {
   const supabase = createClient();
-  const [medecine, setMedecines] = useState<Medicines[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [onRefresh, setResfresh] = useState<boolean>(false);
   const [editData, setEditData] = useState({
     id: 0,
-    title: '',
-    type: 'tab',
-    price: 0,
+    booked_by: '',
+    doctor: 0,
+    doctor_name: '',
+    done: false,
     visible: false,
-    description: '',
   });
 
   const refresh = () => {
@@ -30,16 +31,16 @@ export default function Page() {
 
   const handleEditData = async (id: number) => {
     const { data } = await supabase
-      .from('medicines')
-      .select('id, title, type, price, description')
+      .from('appointments')
+      .select('id, booked_by, doctor, doctor_name, done ')
       .eq('id', id);
     console.log(id);
     setEditData({
       id: data && data[0].id,
-      title: data && data[0]?.title,
-      price: data && data[0]?.price,
-      type: data && data[0].type,
-      description: data && data[0].description,
+      booked_by: data && data[0]?.booked_by,
+      doctor: data && data[0]?.doctor,
+      doctor_name: data && data[0]?.doctor_name,
+      done: data && data[0].done,
       visible: true,
     });
   };
@@ -50,9 +51,9 @@ export default function Page() {
       .select('*')
       .order('id', { ascending: true });
     if (error) {
-      console.log('AppointError', error);
+      console.log('AppointmentError', error);
     } else {
-      setMedecines(meds);
+      setAppointments(meds);
     }
   }, [supabase]);
 
@@ -65,34 +66,31 @@ export default function Page() {
       <h1
         className={`${lusitana.className} mb-4 text-xl font-[800] md:text-3xl`}
       >
-        Medicines
+        Appointment
       </h1>
-      <div className="flex h-full w-full flex-col items-center justify-center gap-10 p-4 md:flex-row md:gap-20">
-        <div>
+      <div className="flex h-full w-full flex-col items-center justify-center gap-10 p-4 md:gap-20">
+        <div className="w-[70%]">
           <h2 className=" mb-4 text-xl font-bold text-gray-800">
-            All Appointments
+            All Appointment
           </h2>
-          <MedicineTable data={medecine} editMedicine={handleEditData} />
+          <AppointmentTable
+            data={appointments}
+            editAppointment={handleEditData}
+          />
         </div>
-        <div className="flex flex-col gap-10">
+        <div className="flex min-w-[70%] flex-col gap-10">
           {editData && editData.visible ? (
             <div>
               <h2 className=" mb-4 text-xl font-bold text-gray-800">
-                Edit Medicine
+                Edit Appointment
               </h2>
-              <EditMedicine
-                medDetails={editData}
+              <EditAppointment
+                apointpDetails={editData}
                 supabase={supabase}
                 onComp={() => setEditData({ ...editData, visible: false })}
               />
             </div>
           ) : null}
-          <div>
-            <h2 className=" mb-4 text-xl font-bold text-gray-800">
-              Add New Medicine
-            </h2>
-            <NewMedicine />
-          </div>
         </div>
       </div>
       <Button
