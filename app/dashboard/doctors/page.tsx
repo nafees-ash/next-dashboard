@@ -37,7 +37,7 @@ export default function Page() {
       .from('doctors')
       .select('id, name, degree, expertise, available, hospital, schedule ')
       .eq('id', id);
-    console.log(id);
+
     setEditData({
       id: data && data[0].id,
       name: data && data[0]?.name,

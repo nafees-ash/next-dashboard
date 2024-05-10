@@ -34,7 +34,7 @@ export default function Page() {
       .from('appointments')
       .select('id, booked_by, doctor, doctor_name, done ')
       .eq('id', id);
-    console.log(id);
+
     setEditData({
       id: data && data[0].id,
       booked_by: data && data[0]?.booked_by,

@@ -64,7 +64,7 @@ export function EditAppointment({
   }
   function handleSelectChange(value: any): void {
     setButtonEnable(true);
-    console.log(value);
+
     setFormData((prevFormData) => {
       return {
         ...prevFormData,

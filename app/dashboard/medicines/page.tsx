@@ -33,7 +33,7 @@ export default function Page() {
       .from('medicines')
       .select('id, title, type, price, description')
       .eq('id', id);
-    console.log(id);
+
     setEditData({
       id: data && data[0].id,
       title: data && data[0]?.title,

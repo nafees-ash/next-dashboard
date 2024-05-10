@@ -219,7 +219,7 @@ export function DoctorTable({
     });
     setRowSelection({});
   };
-  console.log(data);
+
 
   return (
     <div className="w-full">

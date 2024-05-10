@@ -216,7 +216,7 @@ export function AppointmentTable({
     });
     setRowSelection({});
   };
-  console.log(data);
+
 
   return (
     <div className="w-full">
