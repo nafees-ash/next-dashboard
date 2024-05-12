@@ -216,17 +216,15 @@ export function AppointmentTable({
     });
     setRowSelection({});
   };
-
-
   return (
     <div className="w-full">
       <div className="flex items-center gap-3 py-4">
         <Input
           placeholder="Find Appointment"
-          value={(table.getColumn('id')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('id')?.setFilterValue(event.target.value)
-          }
+          value={(table.getColumn('id')?.getFilterValue() as number) ?? ''}
+          onChange={(event) => {
+            table.getColumn('id')?.setFilterValue(event.target.value);
+          }}
           className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
         />
         <DropdownMenu>

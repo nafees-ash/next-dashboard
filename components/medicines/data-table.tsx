@@ -157,7 +157,7 @@ export function MedicineTable({
         const deleteOptionMedicine = async (id: number) => {
           const error = await deleteMedicine(id);
           if (error) {
-            console.log("deleteOptionMedicine: ",error);
+            console.log('deleteOptionMedicine: ', error);
           }
         };
 
@@ -234,9 +234,10 @@ export function MedicineTable({
         <Input
           placeholder="Find Medecine"
           value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('title')?.setFilterValue(event.target.value)
-          }
+          onChange={(event) => {
+            console.log(table.getColumn('title')?.getFilterValue());
+            table.getColumn('title')?.setFilterValue(event.target.value);
+          }}
           className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
         />
         <DropdownMenu>

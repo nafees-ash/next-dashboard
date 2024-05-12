@@ -204,14 +204,14 @@ export function OrderTable({
   // };
 
   return (
-    <div className="h-full w-full overflow-auto pb-10">
+    <div className="h-full w-full overflow-auto px-1 pb-10">
       <div className="flex items-center gap-3 py-4">
         <Input
-          placeholder="Find Medecine"
+          placeholder="Find order"
           value={(table.getColumn('id')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('id')?.setFilterValue(event.target.value)
-          }
+          onChange={(event) => {
+            table.getColumn('id')?.setFilterValue(event.target.value);
+          }}
           className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
         />
         <DropdownMenu>

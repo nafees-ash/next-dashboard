@@ -38,17 +38,30 @@ export function SimpleCard({
 
   const [statusValue, setStatusValue] = useState(status);
   const [boxInfo, setBoxInfo] = useState<BoxInfoProps | null>();
+  const [alreadyReminder, setAlredyReminder] = useState<boolean | null>();
 
   const fetchBoxInfo = useCallback(async () => {
-    const { data, error } = await supabase
+    const { data: boxData, error } = await supabase
       .from('boxs')
       .select('*')
       .eq('owned_by', userId)
       .eq('medicine_id', medicine_id);
     if (!error) {
-      setBoxInfo(data[0]);
+      setBoxInfo(boxData[0]);
+    }
+
+    const { data: reminderData, error: reminderError } = await supabase
+      .from('owned')
+      .select('*')
+      .eq('owned_by', userId)
+      .eq('medicine_id', medicine_id);
+    if (!reminderError) {
+      setAlredyReminder(!!reminderData[0]);
     }
   }, [medicine_id, supabase, userId]);
+
+  console.log(boxInfo);
+  console.log(alreadyReminder);
 
   const handleOrderDone = async () => {
     if (boxInfo && count) {
@@ -73,17 +86,20 @@ export function SimpleCard({
           console.log('insert BOx', error);
         }
       }
-      const { error } = await supabase.from('owned').insert({
-        owned_by: userId,
-        medicine_id,
-        medicine_name,
-        hasReminder,
-        reminder,
-      });
-      if (error) {
-        console.log('insert Owned', error);
+      if (!alreadyReminder) {
+        const { error } = await supabase.from('owned').insert({
+          owned_by: userId,
+          medicine_id,
+          medicine_name,
+          hasReminder,
+          reminder,
+        });
+        if (error) {
+          console.log('insert Owned', error);
+        }
       }
     }
+
     const response = await supabase
       .from('orders')
       .update({ status: statusValue })
