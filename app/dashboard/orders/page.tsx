@@ -67,11 +67,11 @@ export default function Page() {
     [supabase],
   );
 
-  const fetchMedicines = useCallback(async () => {
+  const fetchOrders = useCallback(async () => {
     const { data: orders, error } = await supabase
       .from('orders')
       .select('*')
-      .order('id', { ascending: true });
+      .order('id', { ascending: false });
     if (error) {
       console.log('MedError', error);
     } else {
@@ -80,9 +80,9 @@ export default function Page() {
   }, [supabase]);
 
   useEffect(() => {
-    fetchMedicines();
+    fetchOrders();
     handleShowData;
-  }, [fetchMedicines, onRefresh, handleShowData]);
+  }, [fetchOrders, onRefresh, handleShowData]);
 
   return (
     <main className="flex h-full w-full flex-col overflow-hidden">

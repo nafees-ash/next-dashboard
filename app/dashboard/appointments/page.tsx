@@ -49,7 +49,7 @@ export default function Page() {
     const { data: meds, error } = await supabase
       .from('appointments')
       .select('*')
-      .order('id', { ascending: true });
+      .order('id', { ascending: false });
     if (error) {
       console.log('AppointmentError', error);
     } else {
