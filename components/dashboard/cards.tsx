@@ -65,6 +65,7 @@ export function SimpleCard({
 
   const handleOrderDone = async () => {
     if (boxInfo && count) {
+      console.log('here');
       const newCount = boxInfo.count + count;
       const { error } = await supabase
         .from('boxs')
@@ -76,6 +77,7 @@ export function SimpleCard({
       }
     } else {
       if (order_box) {
+        console.log('here 2');
         const { error } = await supabase.from('boxs').insert({
           owned_by: userId,
           medicine_id,
@@ -87,12 +89,19 @@ export function SimpleCard({
         }
       }
       if (!alreadyReminder) {
+        let newReminder: string[] | null = null;
+        console.log(reminder);
+        if (reminder) {
+          const arrayFromString = JSON.parse(reminder.replace(/'/g, '"'));
+          newReminder = arrayFromString.map(String);
+        }
+
         const { error } = await supabase.from('owned').insert({
           owned_by: userId,
           medicine_id,
           medicine_name,
           hasReminder,
-          reminder,
+          reminder: newReminder,
         });
         if (error) {
           console.log('insert Owned', error);
