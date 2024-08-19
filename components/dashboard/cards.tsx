@@ -64,6 +64,7 @@ export function SimpleCard({
   console.log(alreadyReminder);
 
   const handleOrderDone = async () => {
+    fetchBoxInfo();
     if (boxInfo && count) {
       console.log('here');
       const newCount = boxInfo.count + count;
@@ -89,6 +90,7 @@ export function SimpleCard({
         }
       }
       if (!alreadyReminder) {
+        console.log('here 3');
         let newReminder: string[] | null = null;
         console.log(reminder);
         if (reminder) {

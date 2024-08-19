@@ -1,8 +1,8 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
-import { useCallback, useEffect, useState } from 'react';
-import { Doctor, Medicines } from '@/lib/types/supabase';
+import { use, useCallback, useEffect, useState } from 'react';
+import { Doctor, Medicines, Specialty } from '@/lib/types/supabase';
 
 import { lusitana } from '@/components/fonts';
 import { Button } from '@/components/button';
@@ -10,12 +10,13 @@ import { COLOR_PALETTE2 } from '@/components/variables';
 import { RefreshCcwIcon } from 'lucide-react';
 
 import { DoctorTable } from '@/components/doctors/data-table';
-import { NewDoctor } from '@/components/doctors/add-new';
+import NewDoctor from '@/components/doctors/add-new';
 import { EditDoctor } from '@/components/doctors/edit-data';
 
 export default function Page() {
   const supabase = createClient();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [specialty, setSpecialty] = useState<Specialty[] | undefined>([]);
   const [onRefresh, setResfresh] = useState<boolean>(false);
   const [editData, setEditData] = useState({
     id: 0,
@@ -62,23 +63,53 @@ export default function Page() {
     }
   }, [supabase]);
 
+  const fetchSpecialty = useCallback(async () => {
+    const { data: medical_specialties, error } = await supabase
+      .from('medical_specialties')
+      .select('*');
+    if (error) {
+      console.log('DocError', error);
+    } else {
+      setSpecialty(medical_specialties);
+    }
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchSpecialty();
+  }, [fetchSpecialty, onRefresh]);
+
   useEffect(() => {
     fetchDoctors();
   }, [fetchDoctors, onRefresh]);
 
+  console.log(specialty);
+
   return (
-    <main className="flex  w-full flex-col">
-      <h1
-        className={`${lusitana.className} mb-4 text-xl font-[800] md:text-3xl`}
-      >
-        Doctor
-      </h1>
-      <div className="flex h-full w-full flex-col items-center justify-center gap-10 p-4 md:gap-20">
-        <div className="w-[70%]">
+    <main className="flex h-full w-full flex-col overflow-hidden">
+      <div className="flex items-center justify-between">
+        <h1
+          className={`${lusitana.className}  p-6 text-xl font-[800] md:text-3xl`}
+        >
+          Doctors
+        </h1>
+        <Button
+          className="flex w-max gap-2 rounded-lg border-[1px] p-3 text-black hover:bg-blue-200"
+          style={{
+            backgroundColor: COLOR_PALETTE2.lightblue,
+            borderColor: COLOR_PALETTE2.darkblue,
+          }}
+          onClick={refresh}
+        >
+          <RefreshCcwIcon color={COLOR_PALETTE2.darkblue} size={16} />
+          <p className="text-black">Refresh</p>
+        </Button>
+      </div>
+      <div className="flex h-full w-full items-start justify-center gap-10 overflow-hidden px-10 py-2 md:gap-20">
+        <div className="grow">
           <h2 className=" mb-4 text-xl font-bold text-gray-800">All Doctor</h2>
           <DoctorTable data={doctors} editDoctor={handleEditData} />
         </div>
-        <div className="flex min-w-[70%] flex-col gap-10">
+        <div className="h-full w-[500px] flex-col gap-10 ">
           {editData && editData.visible ? (
             <div>
               <h2 className=" mb-4 text-xl font-bold text-gray-800">
@@ -91,25 +122,14 @@ export default function Page() {
               />
             </div>
           ) : null}
-          <div className="w-full">
+          <div className="flex h-full w-full flex-col">
             <h2 className=" mb-4 text-xl font-bold text-gray-800">
               Add New Doctor
             </h2>
-            <NewDoctor />
+            {specialty && <NewDoctor specialties={specialty} />}
           </div>
         </div>
       </div>
-      <Button
-        className="absolute bottom-7 right-7 flex w-max gap-2 rounded-lg border-[1px] p-3 text-black hover:bg-blue-200"
-        style={{
-          backgroundColor: COLOR_PALETTE2.lightblue,
-          borderColor: COLOR_PALETTE2.darkblue,
-        }}
-        onClick={refresh}
-      >
-        <RefreshCcwIcon color={COLOR_PALETTE2.darkblue} size={16} />
-        <p className="text-black">Refresh</p>
-      </Button>
     </main>
   );
 }

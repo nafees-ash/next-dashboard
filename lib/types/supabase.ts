@@ -1,3 +1,12 @@
+export type Tier = 's' | 'a' | 'b' | 'c' | 'd';
+export type Profession =
+  | 'assistant proffesor'
+  | 'associate proffesor'
+  | 'professor'
+  | 'consultant'
+  | 'specialist'
+  | 'senior specialist';
+
 export interface Medicines {
   id: number;
   title: string;
@@ -60,14 +69,6 @@ export interface EditMedecineProp {
   description: string;
 }
 
-// export interface EditAppointmentProp {
-//   id: number;
-//   title: string;
-//   price: number;
-//   type: string;
-//   description: string;
-// }
-
 export interface User {
   id: number;
   name: string;
@@ -75,25 +76,50 @@ export interface User {
 
 export interface Doctor {
   id: number;
+  created_at: string;
   name: string;
-  schedule: string;
-  available: boolean;
-  expertise: string;
+  available: true;
+  specialization: string;
+  sub_specialties?: string | null;
   hospital: string;
   degree: string;
+  experience: number;
+  phone_number?: string | null;
+  grade: Tier;
+  office_number?: string | null;
+  fee: number;
+  profession?: Profession | null;
+  days_of_week: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  limit: number | null;
 }
 
 export interface Appointment {
-  id: number;
-  booked_by: string;
-  doctor: number;
-  doctor_name: string;
-  done: boolean;
+  appointment_id: number;
+  doctor_id: number;
+  patient_id: bigint;
+  appointment_date: Date;
+  appointment_time: string;
+  reason?: string | null;
+  status?: string | null;
 }
-// export interface Order {
-//   id: number;
-//   order_by: number;
-//   medicine_id: number;
-//   status: 'pending' | 'delivering' | 'done';
-//   address: string;
-// }
+
+export interface DoctorReview {
+  review_id: number;
+  doctor_id: number;
+  patient_id: bigint;
+  rate?: number | null;
+  review_text?: string | null;
+  review_date?: Date | null;
+}
+
+export interface Specialty {
+  specialty: string;
+  sub_specialties?: string[] | null;
+}
+
+export interface MedicalDegree {
+  degree: string;
+  category: Tier;
+}

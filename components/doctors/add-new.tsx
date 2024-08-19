@@ -1,14 +1,9 @@
+import React, { use, useEffect, useState } from 'react';
+import { Control, Controller, FieldValues, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -16,163 +11,401 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useState } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Card, CardContent } from '../ui/card';
+import { DoctorSchema } from '@/lib/schema/form';
+import { Profession, Specialty } from '@/lib/types/supabase';
+import MultiSelect from '../multi-select';
 import { createClient } from '@/lib/supabase/client';
-import { COLOR_PALETTE2 } from '../variables';
 
-interface DocInput {
-  name: string;
-  hospital: string;
-  expertise: string;
-  schedule: string;
-  degree: string;
-}
+type FormSchema = z.infer<typeof DoctorSchema>;
+const professionOptions = [
+  'assistant proffesor',
+  'associate proffesor',
+  'professor',
+  'consultant',
+  'specialist',
+  'senior specialist',
+];
 
-export function NewDoctor() {
-  const { toast } = useToast();
+export default function DoctorCreationForm({
+  specialties,
+}: {
+  specialties: Specialty[];
+}) {
   const supabase = createClient();
-  const [formData, setFormData] = useState<DocInput>({
-    name: '',
-    hospital: '',
-    expertise: '',
-    schedule: '',
-    degree: '',
+  const [subSpecialties, setSubSpecialties] = useState<
+    string[] | null | undefined
+  >([]);
+  const [specialty, setSpecialty] = useState<string>();
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+
+  const form = useForm<FormSchema>({
+    resolver: zodResolver(DoctorSchema),
+    defaultValues: {
+      name: '',
+      available: false,
+      specialty: '',
+      sub_specialties: [],
+      hospital: '',
+      degree: '',
+      experience: 0,
+      phone_number: '',
+      office_number: '',
+      fee: 0,
+      profession: 'specialist',
+      days_of_week: '',
+      start_time: '',
+      end_time: '',
+      limit: 0,
+    },
   });
 
-  const handleSubmit = async () => {
-    const { data: _, error } = await supabase
-      .from('doctors')
-      .insert(formData)
-      .select()
-      .single();
+  const onSubmit = async (data: FormSchema) => {
+    console.log(data);
 
+    const { error } = await supabase.from('doctors').insert([data]).select();
     if (error) {
-      toast({
-        description: error.message,
-      });
+      console.log('Error inserting data:', error.message);
       return;
     }
-    clearform();
-    toast({
-      description: 'Doctor added.',
-    });
   };
 
-  const clearform = () => {
-    setFormData({
-      name: '',
-      hospital: '',
-      expertise: '',
-      schedule: '',
-      degree: '',
-    });
-  };
-
-  function handleChange(event: { target: { name: any; value: any } }): void {
-    setFormData((prevFormData) => {
-      return {
-        ...prevFormData,
-        [event.target.name]: event.target.value,
-      };
-    });
-  }
+  useEffect(() => {
+    if (specialty) {
+      const selected = specialties.find((item) => item.specialty === specialty);
+      if (selected) {
+        setSubSpecialties(selected?.sub_specialties);
+      }
+    }
+  }, [specialties, specialty]);
 
   return (
-    <Card className="bg-grey-50 w-full pt-5">
+    <Card className="bg-grey-50 w-full overflow-scroll py-4">
       <CardContent>
-        <form>
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                name="name"
-                placeholder="Name of the Doctor"
-                onChange={handleChange}
-                value={formData.name}
-                required
-                className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Doctor's name" {...field} required />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="available"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Available</FormLabel>
+                    <FormDescription>
+                      Is the doctor currently available for appointments?
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="specialty"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Specialty</FormLabel>
+                  <Select
+                    onValueChange={(e) => {
+                      field.onChange(e);
+                      setSpecialty(e);
+                    }}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select specialty" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {specialties.map((item, index) => (
+                        <SelectItem key={index} value={item.specialty}>
+                          {item.specialty}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {specialty && subSpecialties && (
+              <MultiSelect
+                label={'Sub Specialties'}
+                options={subSpecialties}
+                selectedOptions={selectedOptions}
+                onChange={(items: string[]) => {
+                  setSelectedOptions(items);
+                  form.setValue('sub_specialties', items);
+                }}
               />
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="price">Degree</Label>
-              <Input
-                id="degree"
-                name="degree"
-                type="text"
-                placeholder="degree"
-                value={formData.degree}
-                onChange={handleChange}
-                required
-                className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
-              />
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="price">Hospital</Label>
-              <Input
-                id="hospital"
-                name="hospital"
-                type="text"
-                placeholder="Hospital"
-                value={formData.hospital}
-                onChange={handleChange}
-                required
-                className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
-              />
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="price">Expertise</Label>
-              <Input
-                id="expertise"
-                name="expertise"
-                type="text"
-                placeholder="expertise"
-                value={formData.expertise}
-                onChange={handleChange}
-                required
-                className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
-              />
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="price">Schedule</Label>
-              <Input
-                id="schedule"
-                name="schedule"
-                type="text"
-                placeholder="schedule"
-                value={formData.schedule}
-                onChange={handleChange}
-                required
-                className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
-              />
-            </div>
-          </div>
-        </form>
+            )}
+
+            <FormField
+              control={form.control}
+              name="hospital"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Hospital</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Hospital name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="degree"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Degree</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., MD, MBBS" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="experience"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Experience (years)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              name="phone_number"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Phone number"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value || null)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              name="office_number"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Office Number</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Office number"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value || null)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="fee"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fee</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* <Controller
+              name="profession"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Profession</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(value || null)}
+                    value={field.value || undefined}
+                  >
+                    <option value="DOCTOR">Doctor</option>
+                    <option value="NURSE">Nurse</option>
+                    <option value="TECHNICIAN">Technician</option>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            /> */}
+
+            <FormField
+              control={form.control}
+              name="profession"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Profession</FormLabel>
+                  <Select
+                    onValueChange={(e) => {
+                      field.onChange(e);
+                      setSpecialty(e);
+                    }}
+                    defaultValue={field.value as Profession}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder="Select profession"
+                          className=" capitalize"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {professionOptions.map((item, index) => (
+                        <SelectItem
+                          key={index}
+                          value={item}
+                          className=" capitalize"
+                        >
+                          {item}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              name="days_of_week"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Days of Week</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., Mon,Wed,Fri"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value || null)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Controller
+              name="start_time"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Time</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="time"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value || null)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              name="end_time"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>End Time</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="time"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value || null)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              name="limit"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Patient Limit</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      value={field.value?.toString() || ''}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? Number(value) : null);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit">Create Doctor</Button>
+          </form>
+        </Form>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button
-          className="col-span-2 rounded-lg border-[1px] p-3 text-black hover:bg-blue-200"
-          style={{
-            backgroundColor: COLOR_PALETTE2.lightblue,
-            borderColor: COLOR_PALETTE2.darkblue,
-          }}
-          onClick={clearform}
-        >
-          Clear
-        </Button>
-        <Button
-          className="col-span-2 rounded-lg border-[1px] p-3 text-black hover:bg-blue-200"
-          style={{
-            backgroundColor: COLOR_PALETTE2.lightblue,
-            borderColor: COLOR_PALETTE2.darkblue,
-          }}
-          onClick={handleSubmit}
-          disabled={formData.name ? false : true}
-        >
-          Add
-        </Button>
-      </CardFooter>
     </Card>
   );
 }

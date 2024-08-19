@@ -124,10 +124,10 @@ export function DoctorTable({
       ),
     },
     {
-      accessorKey: 'expertise',
+      accessorKey: 'specialization',
       header: () => <div className="text-left">Expertise</div>,
       cell: ({ row }) => {
-        return <div className="text-left">{row.getValue('expertise')}</div>;
+        return <div className="text-left">{row.getValue('specialization')}</div>;
       },
     },
     {
@@ -189,7 +189,7 @@ export function DoctorTable({
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: {
-        pageSize: 5,
+        pageSize: 20,
       },
     },
     getSortedRowModel: getSortedRowModel(),
