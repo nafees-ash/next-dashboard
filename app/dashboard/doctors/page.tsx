@@ -2,7 +2,12 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { use, useCallback, useEffect, useState } from 'react';
-import { Doctor, Medicines, Specialty } from '@/lib/types/supabase';
+import {
+  Doctor,
+  MedicalDegree,
+  Medicines,
+  Specialty,
+} from '@/lib/types/supabase';
 
 import { lusitana } from '@/components/fonts';
 import { Button } from '@/components/button';
@@ -11,12 +16,13 @@ import { RefreshCcwIcon } from 'lucide-react';
 
 import { DoctorTable } from '@/components/doctors/data-table';
 import NewDoctor from '@/components/doctors/add-new';
-import { EditDoctor } from '@/components/doctors/edit-data';
+import DoctorEditForm from '@/components/doctors/edit-data';
 
 export default function Page() {
   const supabase = createClient();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [specialty, setSpecialty] = useState<Specialty[] | undefined>([]);
+  const [degrees, setDegrees] = useState<MedicalDegree[] | undefined>([]);
   const [onRefresh, setResfresh] = useState<boolean>(false);
   const [editData, setEditData] = useState({
     id: 0,
@@ -63,16 +69,31 @@ export default function Page() {
     }
   }, [supabase]);
 
+  const fetchDegree = useCallback(async () => {
+    const { data: medical_degrees, error } = await supabase
+      .from('medical_degrees')
+      .select('*');
+    if (error) {
+      console.log('DegreeError', error);
+    } else {
+      setDegrees(medical_degrees);
+    }
+  }, [supabase]);
+
   const fetchSpecialty = useCallback(async () => {
     const { data: medical_specialties, error } = await supabase
       .from('medical_specialties')
       .select('*');
     if (error) {
-      console.log('DocError', error);
+      console.log('SpecialtyError', error);
     } else {
       setSpecialty(medical_specialties);
     }
   }, [supabase]);
+
+  useEffect(() => {
+    fetchDegree();
+  }, [fetchDegree, onRefresh]);
 
   useEffect(() => {
     fetchSpecialty();
@@ -81,8 +102,6 @@ export default function Page() {
   useEffect(() => {
     fetchDoctors();
   }, [fetchDoctors, onRefresh]);
-
-  console.log(specialty);
 
   return (
     <main className="flex h-full w-full flex-col overflow-hidden">
@@ -107,26 +126,34 @@ export default function Page() {
       <div className="flex h-full w-full items-start justify-center gap-10 overflow-hidden px-10 py-2 md:gap-20">
         <div className="grow">
           <h2 className=" mb-4 text-xl font-bold text-gray-800">All Doctor</h2>
-          <DoctorTable data={doctors} editDoctor={handleEditData} />
+          {specialty && degrees && (
+            <DoctorTable
+              data={doctors}
+              specialties={specialty}
+              degrees={degrees}
+            />
+          )}
         </div>
         <div className="h-full w-[500px] flex-col gap-10 ">
-          {editData && editData.visible ? (
+          {/* {editData && editData.visible ? (
             <div>
               <h2 className=" mb-4 text-xl font-bold text-gray-800">
                 Edit Doctor
               </h2>
-              <EditDoctor
-                docDetails={editData}
+              <DoctorEditForm
+                data={editData}
                 supabase={supabase}
                 onComp={() => setEditData({ ...editData, visible: false })}
               />
             </div>
-          ) : null}
+          ) : null} */}
           <div className="flex h-full w-full flex-col">
             <h2 className=" mb-4 text-xl font-bold text-gray-800">
               Add New Doctor
             </h2>
-            {specialty && <NewDoctor specialties={specialty} />}
+            {specialty && degrees && (
+              <NewDoctor specialties={specialty} degrees={degrees} />
+            )}
           </div>
         </div>
       </div>

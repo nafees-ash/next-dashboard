@@ -31,6 +31,7 @@ export default function Component({
   const handleRemoveOption = (option: string) => {
     onChange(selectedOptions.filter((item) => item !== option));
   };
+
   return (
     <div className="relative space-y-2">
       <Label>{label}</Label>

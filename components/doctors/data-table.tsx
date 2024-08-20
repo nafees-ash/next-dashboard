@@ -44,10 +44,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { Doctor } from '@/lib/types/supabase';
+import { Doctor, MedicalDegree, Specialty } from '@/lib/types/supabase';
 import { COLOR_PALETTE2 } from '../variables';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '../ui/use-toast';
+import { DoctorEditForm } from './edit-data';
 
 const supabase = createClient();
 
@@ -58,10 +59,12 @@ const deleteMedicine = async (id: number) => {
 
 export function DoctorTable({
   data,
-  editDoctor,
+  specialties,
+  degrees,
 }: {
   data: Doctor[];
-  editDoctor: (id: number) => Promise<void>;
+  specialties: Specialty[];
+  degrees: MedicalDegree[];
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -124,10 +127,17 @@ export function DoctorTable({
       ),
     },
     {
-      accessorKey: 'specialization',
+      accessorKey: 'specialty',
       header: () => <div className="text-left">Expertise</div>,
       cell: ({ row }) => {
-        return <div className="text-left">{row.getValue('specialization')}</div>;
+        return <div className="text-left">{row.getValue('specialty')}</div>;
+      },
+    },
+    {
+      accessorKey: 'grade',
+      header: () => <div className="text-left">Grade</div>,
+      cell: ({ row }) => {
+        return <div className="text-left">{row.getValue('grade')}</div>;
       },
     },
     {
@@ -143,7 +153,7 @@ export function DoctorTable({
       id: 'actions',
       enableHiding: false,
       cell: ({ row }) => {
-        const doctors = row.original;
+        const doctor = row.original;
 
         const deleteOptionMedicine = async (id: number) => {
           const error = await deleteMedicine(id);
@@ -154,27 +164,34 @@ export function DoctorTable({
         };
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => editDoctor(doctors.id)}>
-                Edit Doctor
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => deleteOptionMedicine(doctors.id)}
-                style={{ backgroundColor: COLOR_PALETTE2.lightred }}
-              >
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-2">
+            <DoctorEditForm
+              data={doctor}
+              specialties={specialties}
+              degrees={degrees}
+            />
+          </div>
+          //   <DropdownMenu>
+          //     <DropdownMenuTrigger asChild>
+          //       <Button variant="ghost" className="h-8 w-8 p-0">
+          //         <span className="sr-only">Open menu</span>
+          //         <MoreHorizontal className="h-4 w-4" />
+          //       </Button>
+          //     </DropdownMenuTrigger>
+          //     <DropdownMenuContent align="end">
+          //       <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          //       <DropdownMenuItem onClick={() => editDoctor(doctors.id)}>
+          //         Edit Doctor
+          //       </DropdownMenuItem>
+          //       <DropdownMenuSeparator />
+          //       <DropdownMenuItem
+          //         onClick={() => deleteOptionMedicine(doctors.id)}
+          //         style={{ backgroundColor: COLOR_PALETTE2.lightred }}
+          //       >
+          //         Delete
+          //       </DropdownMenuItem>
+          //     </DropdownMenuContent>
+          //   </DropdownMenu>
         );
       },
     },
@@ -219,7 +236,6 @@ export function DoctorTable({
     });
     setRowSelection({});
   };
-
 
   return (
     <div className="w-full">

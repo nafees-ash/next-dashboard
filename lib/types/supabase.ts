@@ -1,7 +1,7 @@
 export type Tier = 's' | 'a' | 'b' | 'c' | 'd';
 export type Profession =
-  | 'assistant proffesor'
-  | 'associate proffesor'
+  | 'assistant professor'
+  | 'associate professor'
   | 'professor'
   | 'consultant'
   | 'specialist'
@@ -79,7 +79,7 @@ export interface Doctor {
   created_at: string;
   name: string;
   available: true;
-  specialization: string;
+  specialty: string;
   sub_specialties?: string | null;
   hospital: string;
   degree: string;
@@ -88,7 +88,7 @@ export interface Doctor {
   grade: Tier;
   office_number?: string | null;
   fee: number;
-  profession?: Profession | null;
+  profession: Profession;
   days_of_week: string | null;
   start_time: string | null;
   end_time: string | null;

@@ -23,14 +23,15 @@ import {
 } from '@/components/ui/form';
 import { Card, CardContent } from '../ui/card';
 import { DoctorSchema } from '@/lib/schema/form';
-import { Profession, Specialty } from '@/lib/types/supabase';
+import { MedicalDegree, Profession, Specialty } from '@/lib/types/supabase';
 import MultiSelect from '../multi-select';
 import { createClient } from '@/lib/supabase/client';
+import { getDoctorGrade } from '@/lib/data-man';
 
 type FormSchema = z.infer<typeof DoctorSchema>;
 const professionOptions = [
-  'assistant proffesor',
-  'associate proffesor',
+  'assistant profesor',
+  'associate profesor',
   'professor',
   'consultant',
   'specialist',
@@ -39,8 +40,10 @@ const professionOptions = [
 
 export default function DoctorCreationForm({
   specialties,
+  degrees,
 }: {
   specialties: Specialty[];
+  degrees: MedicalDegree[];
 }) {
   const supabase = createClient();
   const [subSpecialties, setSubSpecialties] = useState<
@@ -48,6 +51,7 @@ export default function DoctorCreationForm({
   >([]);
   const [specialty, setSpecialty] = useState<string>();
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [selectedDegree, setSelectedDegree] = useState<string[]>([]);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(DoctorSchema),
@@ -57,11 +61,12 @@ export default function DoctorCreationForm({
       specialty: '',
       sub_specialties: [],
       hospital: '',
-      degree: '',
+      degree: [],
       experience: 0,
       phone_number: '',
       office_number: '',
       fee: 0,
+      grade: 'd',
       profession: 'specialist',
       days_of_week: '',
       start_time: '',
@@ -71,13 +76,22 @@ export default function DoctorCreationForm({
   });
 
   const onSubmit = async (data: FormSchema) => {
-    console.log(data);
-
+    const grade = await getDoctorGrade(
+      data.sub_specialties?.length || 0,
+      data.degree,
+      data.profession,
+      data.experience,
+    );
+    data.grade = grade;
     const { error } = await supabase.from('doctors').insert([data]).select();
     if (error) {
       console.log('Error inserting data:', error.message);
       return;
     }
+    form.reset();
+    form.setValue('specialty', '');
+    setSelectedOptions([]);
+    setSelectedDegree([]);
   };
 
   useEffect(() => {
@@ -89,8 +103,15 @@ export default function DoctorCreationForm({
     }
   }, [specialties, specialty]);
 
+  //   if (form.formState.errors) {
+  //     console.log(form.formState.errors);
+  //   }
+
   return (
     <Card className="bg-grey-50 w-full overflow-scroll py-4">
+      {/* <Button title="bruh" onClick={async () => await getDoctorGrade()}>
+        Bruh
+      </Button> */}
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -186,7 +207,7 @@ export default function DoctorCreationForm({
               )}
             />
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name="degree"
               render={({ field }) => (
@@ -198,7 +219,19 @@ export default function DoctorCreationForm({
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
+
+            {degrees && (
+              <MultiSelect
+                label={'Degree'}
+                options={degrees.map((degree) => degree.degree)}
+                selectedOptions={selectedDegree}
+                onChange={(items: string[]) => {
+                  setSelectedDegree(items);
+                  form.setValue('degree', items);
+                }}
+              />
+            )}
 
             <FormField
               control={form.control}
