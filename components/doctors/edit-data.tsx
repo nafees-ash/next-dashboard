@@ -37,8 +37,8 @@ import { Pencil } from 'lucide-react';
 
 type FormSchema = z.infer<typeof DoctorSchema>;
 const professionOptions = [
-  'assistant profesor',
-  'associate profesor',
+  'assistant professor',
+  'associate professor',
   'professor',
   'consultant',
   'specialist',
@@ -49,10 +49,12 @@ export function DoctorEditForm({
   data,
   specialties,
   degrees,
+  handleToast,
 }: {
   data: Doctor;
   specialties: Specialty[];
   degrees: MedicalDegree[];
+  handleToast: (message: string) => void;
 }) {
   const supabase = createClient();
   const [subSpecialties, setSubSpecialties] = useState<
@@ -74,7 +76,7 @@ export function DoctorEditForm({
       specialty: data.specialty,
       sub_specialties: JSON.parse(data?.sub_specialties || '') || [],
       hospital: data.hospital,
-      degree: JSON.parse(data?.sub_specialties || '') || [],
+      degree: JSON.parse(data?.degree || '') || [],
       experience: data.experience,
       phone_number: data.phone_number,
       office_number: data.office_number,
@@ -98,12 +100,12 @@ export function DoctorEditForm({
     const { error } = await supabase
       .from('doctors')
       .update(formData)
-      .eq('id', data.id)
-      .select();
+      .eq('id', data.id);
     if (error) {
       console.log('Error updateing data:', error.message);
       return;
     }
+    handleToast('Doctor updated successfully');
   };
 
   useEffect(() => {
@@ -118,7 +120,10 @@ export function DoctorEditForm({
   return (
     <Sheet>
       <SheetTrigger>
-        <Pencil size={20} />
+        <Pencil
+          size={18}
+          className="h-6 w-6 rounded-lg border border-gray-300 p-1"
+        />
       </SheetTrigger>
       <SheetContent className="in-w-[500px] overflow-scroll">
         <SheetTitle>Edit Doctor</SheetTitle>
@@ -413,7 +418,11 @@ export function DoctorEditForm({
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="mb-5">
+              <Button
+                type="submit"
+                className="mb-5"
+                disabled={form.formState.isSubmitting}
+              >
                 Edit Doctor
               </Button>
             </form>

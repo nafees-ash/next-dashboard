@@ -13,15 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import {
-  ArrowUpDown,
-  ChevronDown,
-  DeleteIcon,
-  LucideDelete,
-  MoreHorizontal,
-  RemoveFormattingIcon,
-  Trash,
-} from 'lucide-react';
+import { ChevronDown, RotateCcw, Trash } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -29,9 +21,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
@@ -49,22 +38,21 @@ import { COLOR_PALETTE2 } from '../variables';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '../ui/use-toast';
 import { DoctorEditForm } from './edit-data';
+import { getDoctorGrade } from '@/lib/data-man';
+import { useEffect } from 'react';
 
 const supabase = createClient();
-
-const deleteMedicine = async (id: number) => {
-  const { data, error } = await supabase.from('doctors').delete().eq('id', id);
-  return error;
-};
 
 export function DoctorTable({
   data,
   specialties,
   degrees,
+  refresh,
 }: {
   data: Doctor[];
   specialties: Specialty[];
   degrees: MedicalDegree[];
+  refresh: () => void;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -82,7 +70,14 @@ export function DoctorTable({
   });
   const { toast } = useToast();
 
-  React.useEffect(() => {
+  const handleToast = (message: string) => {
+    refresh();
+    toast({
+      description: message,
+    });
+  };
+
+  useEffect(() => {
     const length = Object.keys(rowSelection).length;
     const getArrays = Object.entries(rowSelection)
       .filter(([key, value]) => value === true)
@@ -93,6 +88,38 @@ export function DoctorTable({
       array: getArrays,
     });
   }, [rowSelection]);
+
+  const deleteMedicine = async (id: number) => {
+    const { data, error } = await supabase
+      .from('doctors')
+      .delete()
+      .eq('id', id);
+    if (!error) {
+      refresh();
+    }
+  };
+
+  const rescanGrade = async (table: Doctor) => {
+    const subSpecialties: string[] = table.sub_specialties
+      ? JSON.parse(table.sub_specialties)
+      : [];
+    const degree: string[] = JSON.parse(table.degree) || [];
+    const grade = await getDoctorGrade(
+      subSpecialties.length,
+      degree,
+      table.profession,
+      table.experience,
+    );
+    if (grade) {
+      const { error } = await supabase
+        .from('doctors')
+        .update({ grade: grade })
+        .eq('id', table.id);
+      if (!error) {
+        handleToast('Grade updated.');
+      }
+    }
+  };
 
   const columns: ColumnDef<Doctor>[] = [
     {
@@ -155,43 +182,25 @@ export function DoctorTable({
       cell: ({ row }) => {
         const doctor = row.original;
 
-        const deleteOptionMedicine = async (id: number) => {
-          const error = await deleteMedicine(id);
-
-          if (error) {
-            console.log('deleteOptionMedicine: ', error);
-          }
-        };
-
         return (
           <div className="flex items-center gap-2">
             <DoctorEditForm
               data={doctor}
               specialties={specialties}
               degrees={degrees}
+              handleToast={handleToast}
+            />
+            <RotateCcw
+              className="h-6 w-6 cursor-pointer rounded-lg border border-gray-300 p-1"
+              onClick={() => rescanGrade(doctor)}
+            />
+            <Trash
+              className="h-6 w-6 cursor-pointer rounded-lg border border-gray-300 p-1"
+              onClick={() => {
+                deleteMedicine(doctor.id);
+              }}
             />
           </div>
-          //   <DropdownMenu>
-          //     <DropdownMenuTrigger asChild>
-          //       <Button variant="ghost" className="h-8 w-8 p-0">
-          //         <span className="sr-only">Open menu</span>
-          //         <MoreHorizontal className="h-4 w-4" />
-          //       </Button>
-          //     </DropdownMenuTrigger>
-          //     <DropdownMenuContent align="end">
-          //       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          //       <DropdownMenuItem onClick={() => editDoctor(doctors.id)}>
-          //         Edit Doctor
-          //       </DropdownMenuItem>
-          //       <DropdownMenuSeparator />
-          //       <DropdownMenuItem
-          //         onClick={() => deleteOptionMedicine(doctors.id)}
-          //         style={{ backgroundColor: COLOR_PALETTE2.lightred }}
-          //       >
-          //         Delete
-          //       </DropdownMenuItem>
-          //     </DropdownMenuContent>
-          //   </DropdownMenu>
         );
       },
     },
@@ -223,16 +232,7 @@ export function DoctorTable({
 
   const deleteSelectedMedicine = async () => {
     selectedRowCount.array.forEach(async (item, index) => {
-      const error = await deleteMedicine(data[item].id);
-      if (error) {
-        toast({
-          description: error?.message,
-        });
-      } else {
-        toast({
-          description: 'Medecine Deleted',
-        });
-      }
+      await deleteMedicine(data[item].id);
     });
     setRowSelection({});
   };

@@ -16,7 +16,6 @@ import { RefreshCcwIcon } from 'lucide-react';
 
 import { DoctorTable } from '@/components/doctors/data-table';
 import NewDoctor from '@/components/doctors/add-new';
-import DoctorEditForm from '@/components/doctors/edit-data';
 
 export default function Page() {
   const supabase = createClient();
@@ -131,22 +130,11 @@ export default function Page() {
               data={doctors}
               specialties={specialty}
               degrees={degrees}
+              refresh={refresh}
             />
           )}
         </div>
         <div className="h-full w-[500px] flex-col gap-10 ">
-          {/* {editData && editData.visible ? (
-            <div>
-              <h2 className=" mb-4 text-xl font-bold text-gray-800">
-                Edit Doctor
-              </h2>
-              <DoctorEditForm
-                data={editData}
-                supabase={supabase}
-                onComp={() => setEditData({ ...editData, visible: false })}
-              />
-            </div>
-          ) : null} */}
           <div className="flex h-full w-full flex-col">
             <h2 className=" mb-4 text-xl font-bold text-gray-800">
               Add New Doctor

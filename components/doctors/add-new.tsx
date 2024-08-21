@@ -30,8 +30,8 @@ import { getDoctorGrade } from '@/lib/data-man';
 
 type FormSchema = z.infer<typeof DoctorSchema>;
 const professionOptions = [
-  'assistant profesor',
-  'associate profesor',
+  'assistant professor',
+  'associate professor',
   'professor',
   'consultant',
   'specialist',
@@ -207,20 +207,6 @@ export default function DoctorCreationForm({
               )}
             />
 
-            {/* <FormField
-              control={form.control}
-              name="degree"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Degree</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., MD, MBBS" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
-
             {degrees && (
               <MultiSelect
                 label={'Degree'}
@@ -304,25 +290,6 @@ export default function DoctorCreationForm({
                 </FormItem>
               )}
             />
-
-            {/* <Controller
-              name="profession"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Profession</FormLabel>
-                  <Select
-                    onValueChange={(value) => field.onChange(value || null)}
-                    value={field.value || undefined}
-                  >
-                    <option value="DOCTOR">Doctor</option>
-                    <option value="NURSE">Nurse</option>
-                    <option value="TECHNICIAN">Technician</option>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
 
             <FormField
               control={form.control}
@@ -435,7 +402,9 @@ export default function DoctorCreationForm({
                 </FormItem>
               )}
             />
-            <Button type="submit">Create Doctor</Button>
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              Create Doctor
+            </Button>
           </form>
         </Form>
       </CardContent>

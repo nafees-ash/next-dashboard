@@ -16,14 +16,13 @@ const getDegreeScore = async (degrees: string[]): Promise<number> => {
     const { data, error } = await supabase
       .from('medical_degrees')
       .select('category')
-      .eq('degree', degree)
-      .single();
+      .eq('degree', degree);
 
     if (error) {
       console.error(error);
       return 0;
     }
-    return data ? Number(tier[data.category]) || 0 : 0;
+    return data && data[0] ? Number(tier[data[0].category]) || 0 : 0;
   });
   const scores = await Promise.all(fetchDegreeScores);
   const totalScore = scores.reduce((acc, score) => acc + score, 0);
@@ -48,9 +47,9 @@ const getSpecialCountScore = (count: number) => {
 
 const getProfessionScore = (profession: string) => {
   switch (profession) {
-    case 'assistant proffesor':
+    case 'assistant professor':
       return 2;
-    case 'associate proffesor':
+    case 'associate professor':
       return 7;
     case 'professor':
       return 10;
