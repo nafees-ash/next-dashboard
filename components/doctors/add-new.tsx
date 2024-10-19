@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Control, Controller, FieldValues, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -27,16 +27,9 @@ import { MedicalDegree, Profession, Specialty } from '@/lib/types/supabase';
 import MultiSelect from '../multi-select';
 import { createClient } from '@/lib/supabase/client';
 import { getDoctorGrade } from '@/lib/data-man';
+import { hospitals, professions } from '@/lib/constant';
 
 type FormSchema = z.infer<typeof DoctorSchema>;
-const professionOptions = [
-  'assistant professor',
-  'associate professor',
-  'professor',
-  'consultant',
-  'specialist',
-  'senior specialist',
-];
 
 export default function DoctorCreationForm({
   specialties,
@@ -52,6 +45,11 @@ export default function DoctorCreationForm({
   const [specialty, setSpecialty] = useState<string>();
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [selectedDegree, setSelectedDegree] = useState<string[]>([]);
+  //const [hospital, setHospital] = useState<string[]>([]);
+  
+  useEffect(()=>{
+    setSelectedOptions([])
+  }, [subSpecialties])
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(DoctorSchema),
@@ -72,6 +70,7 @@ export default function DoctorCreationForm({
       start_time: '',
       end_time: '',
       limit: 0,
+      description: ''
     },
   });
 
@@ -96,6 +95,8 @@ export default function DoctorCreationForm({
 
   useEffect(() => {
     if (specialty) {
+      console.log(specialty)
+      console.log(subSpecialties)
       const selected = specialties.find((item) => item.specialty === specialty);
       if (selected) {
         setSubSpecialties(selected?.sub_specialties);
@@ -114,7 +115,7 @@ export default function DoctorCreationForm({
       </Button> */}
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <FormField
               control={form.control}
               name="name"
@@ -142,9 +143,6 @@ export default function DoctorCreationForm({
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Available</FormLabel>
-                    <FormDescription>
-                      Is the doctor currently available for appointments?
-                    </FormDescription>
                   </div>
                 </FormItem>
               )}
@@ -181,7 +179,7 @@ export default function DoctorCreationForm({
               )}
             />
 
-            {specialty && subSpecialties && (
+            {specialty && (
               <MultiSelect
                 label={'Sub Specialties'}
                 options={subSpecialties}
@@ -199,6 +197,39 @@ export default function DoctorCreationForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Hospital</FormLabel>
+                  <Select
+                    onValueChange={(e) => {
+                      field.onChange(e);
+                      //setHos(e);
+                    }}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Hospital" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {hospitals.map((item, index) => (
+                        <SelectItem key={index} value={item}>
+                          {item}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+
+
+            {/*<FormField
+              control={form.control}
+              name="hospital"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Hospital</FormLabel>
                   <FormControl>
                     <Input placeholder="Hospital name" {...field} />
                   </FormControl>
@@ -206,6 +237,7 @@ export default function DoctorCreationForm({
                 </FormItem>
               )}
             />
+            */}
 
             {degrees && (
               <MultiSelect
@@ -313,7 +345,7 @@ export default function DoctorCreationForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {professionOptions.map((item, index) => (
+                      {professions.map((item, index) => (
                         <SelectItem
                           key={index}
                           value={item}
@@ -346,6 +378,25 @@ export default function DoctorCreationForm({
                 </FormItem>
               )}
             />
+ 
+            <Controller
+              name="description"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Description"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value || null)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <Controller
               name="start_time"
               control={form.control}

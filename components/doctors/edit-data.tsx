@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Control, Controller, FieldValues, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -34,16 +34,19 @@ import { createClient } from '@/lib/supabase/client';
 import { getDoctorGrade } from '@/lib/data-man';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
 import { Pencil } from 'lucide-react';
+import { hospitals, professions } from '@/lib/constant';
 
 type FormSchema = z.infer<typeof DoctorSchema>;
-const professionOptions = [
-  'assistant professor',
-  'associate professor',
-  'professor',
-  'consultant',
-  'specialist',
-  'senior specialist',
-];
+
+
+const parseJsonSafely = (jsonString: string | null | undefined) => {
+  try {
+    const parsed = jsonString ? JSON.parse(jsonString) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
 
 export function DoctorEditForm({
   data,
@@ -62,10 +65,11 @@ export function DoctorEditForm({
   >([]);
   const [specialty, setSpecialty] = useState<string>(data.specialty);
   const [selectedOptions, setSelectedOptions] = useState<string[]>(
-    JSON.parse(data?.sub_specialties || '') || [],
+    parseJsonSafely(data?.sub_specialties)
   );
+
   const [selectedDegree, setSelectedDegree] = useState<string[]>(
-    JSON.parse(data.degree) || [],
+    parseJsonSafely(data?.degree)
   );
 
   const form = useForm<FormSchema>({
@@ -74,9 +78,11 @@ export function DoctorEditForm({
       name: data.name,
       available: data.available,
       specialty: data.specialty,
-      sub_specialties: JSON.parse(data?.sub_specialties || '') || [],
+      sub_specialties: parseJsonSafely(data?.sub_specialties),
+      //sub_specialties: JSON.parse(data?.sub_specialties || '') || [],
       hospital: data.hospital,
-      degree: JSON.parse(data?.degree || '') || [],
+      degree: parseJsonSafely(data?.degree),
+      //degree: JSON.parse(data?.degree || '') || [],
       experience: data.experience,
       phone_number: data.phone_number,
       office_number: data.office_number,
@@ -86,6 +92,7 @@ export function DoctorEditForm({
       start_time: data.start_time,
       end_time: data.end_time,
       limit: data.limit,
+      description: data.description,
     },
   });
 
@@ -197,7 +204,7 @@ export function DoctorEditForm({
                 )}
               />
 
-              {specialty && subSpecialties && (
+              {specialty && (
                 <MultiSelect
                   label={'Sub Specialties'}
                   options={subSpecialties}
@@ -215,13 +222,31 @@ export function DoctorEditForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Hospital</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Hospital name" {...field} />
-                    </FormControl>
+                    <Select
+                      onValueChange={(e) => {
+                        field.onChange(e);
+                        //setHos(e);
+                      }}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Hospital" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {hospitals.map((item, index) => (
+                          <SelectItem key={index} value={item}>
+                            {item}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
 
               {degrees && (
                 <MultiSelect
@@ -329,7 +354,7 @@ export function DoctorEditForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {professionOptions.map((item, index) => (
+                        {professions.map((item, index) => (
                           <SelectItem
                             key={index}
                             value={item}
@@ -362,6 +387,25 @@ export function DoctorEditForm({
                   </FormItem>
                 )}
               />
+
+              <Controller
+                name="description"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Description"
+                        value={field.value || ''}
+                        onChange={(e) => field.onChange(e.target.value || null)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <Controller
                 name="start_time"
                 control={form.control}

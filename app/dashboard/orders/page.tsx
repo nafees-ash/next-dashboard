@@ -91,14 +91,14 @@ export default function Page() {
       >
         Orders
       </h1>
-      <div className="flex h-full w-full flex-col items-center justify-center gap-10 overflow-hidden p-4 py-4 md:gap-20">
+      <div className="flex h-full w-full flex-col md:flex-row items-center justify-center gap-10 overflow-hidden p-4 py-4 md:gap-20">
         <div className="h-full w-[70%] overflow-hidden">
           <h2 className=" mb-4 text-xl font-bold text-gray-800">All Orders</h2>
           <OrderTable data={order} showData={handleShowData} />
         </div>
 
         {showOrderData.visible && (
-          <div className="h-full w-[70%] overflow-hidden">
+          <div className="h-full w-[80%] md:w-[500px] overflow-hidden">
             <SimpleCard simpleCardData={showOrderData} supabase={supabase} />
           </div>
         )}

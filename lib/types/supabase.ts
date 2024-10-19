@@ -93,6 +93,7 @@ export interface Doctor {
   start_time: string | null;
   end_time: string | null;
   limit: number | null;
+  description: string | null;
 }
 
 export interface Appointment {

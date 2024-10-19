@@ -1,7 +1,7 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
-import { use, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Doctor,
   MedicalDegree,
@@ -82,7 +82,8 @@ export default function Page() {
   const fetchSpecialty = useCallback(async () => {
     const { data: medical_specialties, error } = await supabase
       .from('medical_specialties')
-      .select('*');
+      .select('*')
+      .order("specialty");
     if (error) {
       console.log('SpecialtyError', error);
     } else {
@@ -123,7 +124,7 @@ export default function Page() {
         </Button>
       </div>
       <div className="flex h-full w-full items-start justify-center gap-10 overflow-hidden px-10 py-2 md:gap-20">
-        <div className="grow">
+        <div className="h-full flex flex-col grow overflow-hidden">
           <h2 className=" mb-4 text-xl font-bold text-gray-800">All Doctor</h2>
           {specialty && degrees && (
             <DoctorTable

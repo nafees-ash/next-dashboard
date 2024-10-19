@@ -43,6 +43,15 @@ import { useEffect } from 'react';
 
 const supabase = createClient();
 
+const parseJsonSafely = (jsonString: string | null | undefined) => {
+  try {
+    const parsed = jsonString ? JSON.parse(jsonString) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
 export function DoctorTable({
   data,
   specialties,
@@ -99,11 +108,15 @@ export function DoctorTable({
     }
   };
 
+  const rescanGradeAll = async (allTable: Doctor[]) => {
+    allTable.forEach(async table => {
+      await rescanGrade(table)
+    })
+  }
+
   const rescanGrade = async (table: Doctor) => {
-    const subSpecialties: string[] = table.sub_specialties
-      ? JSON.parse(table.sub_specialties)
-      : [];
-    const degree: string[] = JSON.parse(table.degree) || [];
+    const subSpecialties: string[] = parseJsonSafely(table.sub_specialties)
+    const degree: string[] = parseJsonSafely(table.degree);
     const grade = await getDoctorGrade(
       subSpecialties.length,
       degree,
@@ -184,12 +197,14 @@ export function DoctorTable({
 
         return (
           <div className="flex items-center gap-2">
+
             <DoctorEditForm
               data={doctor}
               specialties={specialties}
               degrees={degrees}
               handleToast={handleToast}
             />
+
             <RotateCcw
               className="h-6 w-6 cursor-pointer rounded-lg border border-gray-300 p-1"
               onClick={() => rescanGrade(doctor)}
@@ -238,7 +253,7 @@ export function DoctorTable({
   };
 
   return (
-    <div className="w-full">
+    <div className="flex flex-col h-full w-full overflow-hidden">
       <div className="flex items-center gap-3 py-4">
         <Input
           placeholder="Find Doctor"
@@ -248,6 +263,9 @@ export function DoctorTable({
           }
           className="rounded-lg border-[1px] border-gray-300 bg-gray-50 p-3"
         />
+        <Button onClick={() => rescanGradeAll(data)} style={{ backgroundColor: COLOR_PALETTE2.lightblue, borderColor: COLOR_PALETTE2.darkblue, borderWidth: 1 }} className='text-black'>
+          Scan All
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -280,8 +298,9 @@ export function DoctorTable({
               })}
           </DropdownMenuContent>
         </DropdownMenu>
+
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border h-full overflow-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -292,9 +311,9 @@ export function DoctorTable({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                     </TableHead>
                   );
                 })}

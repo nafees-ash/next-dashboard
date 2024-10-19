@@ -1,0 +1,122 @@
+export const specialties = [
+  "Cardiology",
+  "Cardiothoracic Surgery",
+  "Cardiac Electrophysiology",
+  "Pediatric Cardiology",
+  "Obstetrics and Gynecology",
+  "Gynecology & Obstetrics Specialist",
+  "Orthopedics",
+  "Orthopedic Surgery",
+  "Pediatrics",
+  "Pediatric Subspecialties",
+  "Neonatology",
+  "Child Development",
+  "Nephrology",
+  "Urology",
+  "Oncology",
+  "Hematology",
+  "Colorectal Surgery",
+  "General Surgery",
+  "Laparoscopic Surgery",
+  "Plastic Surgery",
+  "Burn & Cosmetic Surgery",
+  "Maxillofacial Surgery",
+  "Endocrinology",
+  "Diabetology",
+  "Gastroenterology",
+  "Hepatology",
+  "Pulmonology",
+  "Neurology",
+  "Neurosurgery",
+  "Anesthesiology",
+  "Critical Care",
+  "Mental Health",
+  "Dermatology",
+  "Venereology",
+  "Venereology & Dermatology",
+  "Rheumatology",
+  "Ophthalmology",
+  "Otolaryngology (ENT)",
+  "Fertility & IVF",
+  "Nutrition & Dietetics",
+  "Dental Surgery",
+  "Diagnostic Radiology",
+  "Interventional Radiology",
+  "Counseling & Psychotherapy",
+  "Physical Medicine & Rehabilitation",
+  "Chest Diseases",
+  "Respiratory Medicine",
+  "Medicine",
+  "Diabetes Care & Endocrinology",
+  "Surgical Oncology",
+  "",
+] as const;
+
+export const professions = [
+  "assistant professor",
+  "associate professor",
+  "professor",
+  "consultant",
+  "associate consultant",
+  "senior consultant",
+  "specialist",
+  "senior specialist",
+  "coordinator",
+  "surgeon",
+] as const;
+
+export const hospitals = [
+  "Ibn Sina Hospital",
+  "Ibn Sina Diagnostic & Consultation Center",
+  "Popular Diagnostic Centre Ltd. Dhanmondi",
+  "Popular Diagnostic Centre Ltd. Mirpur",
+  "Evercare Hospital, Dhaka",
+  "Square Hospital",
+  "Islami Bank Hospital, Mirpur",
+  "BSPMU",
+  "Sher-E-Bangla Medical College & Hospital",
+  "Popular Diagnostic Centre Ltd. Dhanmondi",
+] as const;
+
+export const possibleArea = [
+  "mirpur",
+  "dhaka",
+  "bangladesh",
+  "gulshan",
+  "banani",
+  "dhanmondi",
+  "bashundhara",
+];
+
+export const symptoms = [
+  "fever",
+  "cough",
+  "sore throat",
+  "runny nose",
+  "congestion",
+  "headache",
+  "muscle aches",
+  "fatigue",
+  "nausea",
+  "vomiting",
+  "diarrhea",
+  "shortness of breath",
+  "chest pain",
+  "dizziness",
+  "loss of taste",
+  "loss of smell",
+  "rash",
+  "sweating",
+  "chills",
+  "sweating",
+  "abdominal pain",
+] as const;
+export const conditions = ["mild", "regular", "severe"] as const;
+
+export const tier = ["s", "a", "b", "c", "d"] as const;
+
+export const CHEAP_LIMIT = 250;
+
+export const APPOINTMENT_LIMIT = 10;
+
+

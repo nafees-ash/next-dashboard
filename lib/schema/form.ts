@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { professions } from '../constant';
 
 export const DoctorSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -13,17 +14,11 @@ export const DoctorSchema = z.object({
   phone_number: z.string().nullable(),
   office_number: z.string().nullable(),
   fee: z.number().min(0, { message: 'Fee must be a positive number.' }),
-  profession: z.enum([
-    'assistant professor',
-    'associate professor',
-    'professor',
-    'consultant',
-    'specialist',
-    'senior specialist',
-  ]),
+  profession: z.enum(professions),
   grade: z.string().optional(),
   days_of_week: z.string().nullable(),
   start_time: z.string().nullable(),
   end_time: z.string().nullable(),
   limit: z.number().nullable(),
+  description: z.string().nullable()
 });
